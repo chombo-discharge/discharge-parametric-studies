@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Slurm Installation (Debian/Ubuntu) &mdash; Discharge Parametric Studies 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Required Software" href="RequiredSoftware.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Parametric Studies
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/BasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/OverallDesign.html">Overall Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/RunDefinition.html">Run Definition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Writing jobscripts</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts.html">Writing Jobscripts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="RequiredSoftware.html">Required Software</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Local Slurm Installation (Debian/Ubuntu)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-install-packages">Step 1 — Install packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-start-munge">Step 2 — Start Munge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-configure-slurm-conf">Step 3 — Configure slurm.conf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-create-required-directories">Step 4 — Create required directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-5-start-slurm-daemons">Step 5 — Start Slurm daemons</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-6-verify">Step 6 — Verify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-7-enable-at-boot-optional">Step 7 — Enable at boot (optional)</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Parametric Studies</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Local Slurm Installation (Debian/Ubuntu)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Prerequisites/Example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="local-slurm-installation-debian-ubuntu">
+<h1>Local Slurm Installation (Debian/Ubuntu)<a class="headerlink" href="#local-slurm-installation-debian-ubuntu" title="Permalink to this heading"></a></h1>
+<p>This guide covers installing Slurm on a single Debian or Ubuntu machine for local testing, including WSL. Both the controller (<code class="docutils literal notranslate"><span class="pre">slurmctld</span></code>) and compute node (<code class="docutils literal notranslate"><span class="pre">slurmd</span></code>) will run on the same host.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If running in WSL, ensure the <code class="docutils literal notranslate"><span class="pre">memory</span></code> setting in your <a class="reference external" href="https://learn.microsoft.com/en-us/windows/wsl/wsl-config">wsl-config</a> (either <code class="docutils literal notranslate"><span class="pre">/etc/wsl.conf</span></code> per-distribution or <code class="docutils literal notranslate"><span class="pre">%homepath%\\.wslconfig</span></code> globally) is set high enough to match the <code class="docutils literal notranslate"><span class="pre">RealMemory</span></code> you will configure in <code class="docutils literal notranslate"><span class="pre">slurm.conf</span></code>, plus a margin for the OS itself.</p>
+</div>
+<section id="step-1-install-packages">
+<h2>Step 1 — Install packages<a class="headerlink" href="#step-1-install-packages" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>munge<span class="w"> </span>libmunge-dev<span class="w"> </span>slurmctld<span class="w"> </span>slurmd<span class="w"> </span>slurm-client
+</pre></div>
+</div>
+<p><a class="reference external" href="https://dun.github.io/munge/">Munge</a> provides credential authentication between the controller and compute nodes. A munge key is generated automatically during installation.</p>
+</section>
+<section id="step-2-start-munge">
+<h2>Step 2 — Start Munge<a class="headerlink" href="#step-2-start-munge" title="Permalink to this heading"></a></h2>
+<p>Munge must be running before the Slurm daemons start:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>munge
+sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>munge
+</pre></div>
+</div>
+</section>
+<section id="step-3-configure-slurm-conf">
+<h2>Step 3 — Configure slurm.conf<a class="headerlink" href="#step-3-configure-slurm-conf" title="Permalink to this heading"></a></h2>
+<p>Slurm is configured through <code class="docutils literal notranslate"><span class="pre">/etc/slurm/slurm.conf</span></code>. Two values must match your machine: the hostname and the hardware spec of the node.</p>
+<p>Get your hostname:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>hostname<span class="w"> </span>-s
+</pre></div>
+</div>
+<p>Get the hardware spec that Slurm should use for the node (run as root so it can read all hardware info):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>slurmd<span class="w"> </span>-C
+</pre></div>
+</div>
+<p>This prints a <code class="docutils literal notranslate"><span class="pre">NodeName=...</span></code> line with the correct <code class="docutils literal notranslate"><span class="pre">CPUs</span></code>, <code class="docutils literal notranslate"><span class="pre">RealMemory</span></code>, etc. for your machine. Use this line verbatim in the config below.</p>
+<p>A minimal <code class="docutils literal notranslate"><span class="pre">/etc/slurm/slurm.conf</span></code> for a single-node setup:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">/etc/slurm/slurm.conf</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ClusterName=localcluster
+SlurmctldHost=my-hostname          # replace with output of: hostname -s
+
+MpiDefault=none
+ProctrackType=proctrack/linuxproc
+TaskPlugin=task/none
+SchedulerType=sched/backfill
+SelectType=select/cons_tres
+SelectTypeParameters=CR_Core
+
+SlurmctldLogFile=/var/log/slurm/slurmctld.log
+SlurmdLogFile=/var/log/slurm/slurmd.log
+StateSaveLocation=/var/spool/slurmctld
+SlurmdSpoolDir=/var/spool/slurmd
+
+# Replace with the NodeName line from: sudo slurmd -C
+NodeName=my-hostname CPUs=4 RealMemory=7800 State=UNKNOWN
+
+PartitionName=debug Nodes=ALL Default=YES MaxTime=INFINITE State=UP
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">SlurmctldHost</span></code> and the <code class="docutils literal notranslate"><span class="pre">NodeName</span></code> hostname must both match the output of <code class="docutils literal notranslate"><span class="pre">hostname</span> <span class="pre">-s</span></code> exactly, or the daemons will fail to register with each other.</p>
+</div>
+</section>
+<section id="step-4-create-required-directories">
+<h2>Step 4 — Create required directories<a class="headerlink" href="#step-4-create-required-directories" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>/var/log/slurm<span class="w"> </span>/var/spool/slurmctld<span class="w"> </span>/var/spool/slurmd
+sudo<span class="w"> </span>chown<span class="w"> </span>-R<span class="w"> </span>slurm:slurm<span class="w"> </span>/var/log/slurm<span class="w"> </span>/var/spool/slurmctld<span class="w"> </span>/var/spool/slurmd
+sudo<span class="w"> </span>touch<span class="w"> </span>/var/log/slurm/slurmctld.log<span class="w"> </span>/var/log/slurm/slurmd.log
+sudo<span class="w"> </span>chown<span class="w"> </span>slurm:slurm<span class="w"> </span>/var/log/slurm/slurmctld.log<span class="w"> </span>/var/log/slurm/slurmd.log
+</pre></div>
+</div>
+</section>
+<section id="step-5-start-slurm-daemons">
+<h2>Step 5 — Start Slurm daemons<a class="headerlink" href="#step-5-start-slurm-daemons" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>slurmctld
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>slurmd
+</pre></div>
+</div>
+<p>Check that both are running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>slurmctld<span class="w"> </span>slurmd
+</pre></div>
+</div>
+</section>
+<section id="step-6-verify">
+<h2>Step 6 — Verify<a class="headerlink" href="#step-6-verify" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>sinfo
+PARTITION<span class="w"> </span>AVAIL<span class="w">  </span>TIMELIMIT<span class="w">  </span>NODES<span class="w">  </span>STATE<span class="w"> </span>NODELIST
+debug*<span class="w">       </span>up<span class="w">   </span>infinite<span class="w">      </span><span class="m">1</span><span class="w">   </span>idle<span class="w"> </span>my-hostname
+</pre></div>
+</div>
+<p>The node should show as <code class="docutils literal notranslate"><span class="pre">idle</span></code>. If it shows <code class="docutils literal notranslate"><span class="pre">down</span></code> or <code class="docutils literal notranslate"><span class="pre">drain</span></code>, check <code class="docutils literal notranslate"><span class="pre">/var/log/slurm/slurmd.log</span></code> for errors — the most common cause is a hostname mismatch between <code class="docutils literal notranslate"><span class="pre">SlurmctldHost</span></code>/<code class="docutils literal notranslate"><span class="pre">NodeName</span></code> and the actual machine hostname.</p>
+<p>You can now submit test jobs with <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>.</p>
+</section>
+<section id="step-7-enable-at-boot-optional">
+<h2>Step 7 — Enable at boot (optional)<a class="headerlink" href="#step-7-enable-at-boot-optional" title="Permalink to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>munge<span class="w"> </span>slurmctld<span class="w"> </span>slurmd
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="RequiredSoftware.html" class="btn btn-neutral float-left" title="Required Software" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

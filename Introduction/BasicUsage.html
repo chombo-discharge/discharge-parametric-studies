@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Basic Usage &mdash; Discharge Parametric Studies 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Overall Design" href="OverallDesign.html" />
+    <link rel="prev" title="Discharge Parametric Studies" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Parametric Studies
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OverallDesign.html">Overall Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RunDefinition.html">Run Definition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Writing jobscripts</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts.html">Writing Jobscripts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Prerequisites/RequiredSoftware.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Prerequisites/Example.html">Local Slurm Installation (Debian/Ubuntu)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Parametric Studies</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Basic Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Introduction/BasicUsage.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="basic-usage">
+<h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">configurator.py</span></code> script can be used to set up directory structures and submit slurm jobs for wide parametric sweeps over chombo-discharge based studies.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Invocation options
+$ python configurator.py –help</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="n">usage</span><span class="p">:</span> <span class="n">configurator</span><span class="o">.</span><span class="n">py</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">verbose</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">logfile</span> <span class="n">LOGFILE</span><span class="p">]</span> <span class="p">[</span><span class="o">--</span><span class="n">output</span><span class="o">-</span><span class="nb">dir</span> <span class="n">OUTPUT_DIR</span><span class="p">]</span>
+                        <span class="p">[</span><span class="o">--</span><span class="n">dim</span> <span class="n">DIM</span><span class="p">]</span>
+                        <span class="n">run_definition</span>
+
+ <span class="n">Batch</span> <span class="n">script</span> <span class="k">for</span> <span class="n">running</span> <span class="n">user</span><span class="o">-</span><span class="n">defined</span><span class="p">,</span> <span class="n">parametrised</span> <span class="n">chombo</span><span class="o">-</span><span class="n">discharge</span> <span class="n">studies</span><span class="o">.</span>
+
+ <span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
+   <span class="n">run_definition</span>        <span class="n">parameter</span> <span class="n">space</span> <span class="nb">input</span> <span class="n">file</span><span class="o">.</span> <span class="n">Json</span> <span class="n">read</span> <span class="n">directly</span><span class="p">,</span> <span class="ow">or</span> <span class="k">if</span> <span class="o">.</span><span class="n">py</span> <span class="n">file</span> <span class="n">look</span>
+                         <span class="k">for</span> <span class="s1">&#39;top_object&#39;</span> <span class="n">dictionary</span>
+
+ <span class="n">options</span><span class="p">:</span>
+   <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>            <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+   <span class="o">--</span><span class="n">verbose</span>             <span class="n">increase</span> <span class="n">verbosity</span>
+   <span class="o">--</span><span class="n">logfile</span> <span class="n">LOGFILE</span>     <span class="n">log</span> <span class="n">file</span><span class="o">.</span> <span class="p">(</span><span class="n">Postfix</span><span class="p">)</span> <span class="n">Rotated</span> <span class="n">automatically</span> <span class="n">each</span> <span class="n">invocation</span><span class="o">.</span>
+   <span class="o">--</span><span class="n">output</span><span class="o">-</span><span class="nb">dir</span> <span class="n">OUTPUT_DIR</span>
+                         <span class="n">output</span> <span class="n">directory</span> <span class="k">for</span> <span class="n">study</span> <span class="n">result</span> <span class="n">files</span>
+   <span class="o">--</span><span class="n">dim</span> <span class="n">DIM</span>             <span class="n">Dimensionality</span> <span class="n">of</span> <span class="n">simulations</span><span class="o">.</span> <span class="n">Must</span> <span class="n">match</span> <span class="n">chombo</span><span class="o">-</span><span class="n">discharge</span>
+                         <span class="n">compilation</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<p>The most important part is the <code class="docutils literal notranslate"><span class="pre">run_definition</span></code>, which is either structured as a json file or python file. If it is a python file it is dynamically imported and the object <code class="docutils literal notranslate"><span class="pre">top_object</span></code> (a dictionary) is loaded. A python dictionary containing basic types (sub-dictionaries, lists, strings, numbers, booleans) almost has the same syntax structured JSON data, and it is easy to use the json module to dump such a dictionary to a json file if needed. There are benefits for keeping your <cite>run_definition</cite> as a .py file though, e.g. the possibility to use variables when setting up the project structure or specifying numerical parameter ranges.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Discharge Parametric Studies" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="OverallDesign.html" class="btn btn-neutral float-right" title="Overall Design" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run Definition &mdash; Discharge Parametric Studies 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Writing Jobscripts" href="../Jobscripts.html" />
+    <link rel="prev" title="Overall Design" href="OverallDesign.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Parametric Studies
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="BasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OverallDesign.html">Overall Design</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Run Definition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#defining-parameter-spaces">Defining Parameter Spaces</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#navigating-json-object-hierarchies">Navigating JSON object hierarchies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dummy-parameters">Dummy parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Writing jobscripts</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts.html">Writing Jobscripts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Prerequisites/RequiredSoftware.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Prerequisites/Example.html">Local Slurm Installation (Debian/Ubuntu)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Parametric Studies</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Run Definition</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Introduction/RunDefinition.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="run-definition">
+<h1>Run Definition<a class="headerlink" href="#run-definition" title="Permalink to this heading"></a></h1>
+<p>A database/study will have these configurable fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">identifier</span></code>, unique</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_directory</span></code>, relative to the cmdline output directory, i.e.  <code class="docutils literal notranslate"><span class="pre">--output-dir</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">output_dir_prefix</span></code> (default: <code class="docutils literal notranslate"><span class="pre">&quot;run_&quot;</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">program</span></code>, executable to run. Will be copied to output directory hierarchy.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">job-script</span></code>, job script to do the heavy lifting (call mpirun / start simulation code)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">job_script_dependencies</span></code>, (python) scripts and files that the job-script needs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">required_files</span></code>, typical input files for the simulation, post-analysis scripts, etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parameter_space</span></code>, a dictionary of parameters (c.f. <a class="reference internal" href="#param-space"><span class="std std-ref">Defining Parameter Spaces</span></a>)</p></li>
+</ul>
+<p>The difference between <code class="docutils literal notranslate"><span class="pre">job_script_dependencies</span></code> and <code class="docutils literal notranslate"><span class="pre">required_files</span></code> is that the <code class="docutils literal notranslate"><span class="pre">required_files</span></code> will be copied into the bottom-level directory where the program is run from, i.e. into every specific <em>run</em> directory for every invocation over the parameter space.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">required_files</span></code> is typically used for <code class="docutils literal notranslate"><span class="pre">*.inputs</span></code> chombo-discharge files, physical/chemical input files like <code class="docutils literal notranslate"><span class="pre">*.json</span></code> files, or other plain data files. Sometimes extra python modules or bash-scripts might be needed at the run-level, so use this field to copy those dependencies in.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">job_script_dependencies</span></code>, as the name implies, should point to whatever code is needed to configure and submit the actual slurm jobs.</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">configurator.py</span></code> script will set up directory structures and copy files into place, then launch slurm array jobs over all the configured parameter space referenced in each database. Then the same is repeated for the second-level studies. These second-level slurm array jobs are made dependent on the database jobs, essentially securing that they are run in sequence.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>It is up to the <cite>job_script</cite> to submit the actual slurm jobs. Facilities are in place to translate a given slurm array job id/index into the correct parameter values.</p>
+</div>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">directory structure example</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">inception_stepper</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="s1">&#39;inception_stepper&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;output_directory&#39;</span><span class="p">:</span> <span class="s1">&#39;is_db&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;program&#39;</span><span class="p">:</span> <span class="s1">&#39;program</span><span class="si">{DIMENSIONALITY}</span><span class="s1">d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;job_script&#39;</span><span class="p">:</span> <span class="s1">&#39;discharge_inception_jobscript.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;job_script_dependencies&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;generic_array_job.sh&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;parse_report.py&#39;</span><span class="p">,</span>
+        <span class="o">...</span>
+        <span class="p">],</span>
+    <span class="s1">&#39;required_files&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;master.inputs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;transport_data.txt&#39;</span>
+        <span class="p">],</span>
+    <span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<span class="n">plasma_study</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="s1">&#39;photoion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;output_directory&#39;</span><span class="p">:</span> <span class="s1">&#39;study0&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;program&#39;</span><span class="p">:</span> <span class="s1">&#39;program</span><span class="si">{DIMENSIONALITY}</span><span class="s1">d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;job_script&#39;</span><span class="p">:</span> <span class="s1">&#39;plasma_jobscript.py&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;job_script_dependencies&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;generic_array_job.sh&#39;</span><span class="p">,</span>
+        <span class="o">...</span>
+        <span class="p">],</span>
+    <span class="s1">&#39;required_files&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s1">&#39;master.inputs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;chemistry.json&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;detachment_rate.dat&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;electron_transport_data.dat&#39;</span>
+        <span class="s1">&#39;Analyze.py&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<span class="n">top_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">databases</span><span class="o">=</span><span class="p">[</span><span class="n">inception_stepper</span><span class="p">],</span>
+        <span class="n">studies</span><span class="o">=</span><span class="p">[</span><span class="n">plasma_study</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The example above has a more realistic structure. How the parameter spaces are defined can be found in a later section.</p>
+<p>Note the use of a templated filename for the <code class="docutils literal notranslate"><span class="pre">program</span></code> field, where the part <code class="docutils literal notranslate"><span class="pre">&quot;{DIMENSIONALITY}&quot;</span></code> is substituted with the dimension specified on the command line using the <code class="docutils literal notranslate"><span class="pre">--dim</span></code> flag.</p>
+<p>Just after issuing this command, when the first slurm job for the database named <em>‘inception_stepper’</em> has just started in the subdirectory <code class="docutils literal notranslate"><span class="pre">run_0</span></code>, the resulting file hierarchy from this could look like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>ls<span class="w"> </span>-R<span class="w"> </span>--file-type<span class="w"> </span>output-dir
+.:
+is_db/<span class="w">  </span>study0/
+
+./is_db:
+array_job_id<span class="w">                      </span>jobscript_symlink@<span class="w">                                 </span>run_0/
+discharge_inception_jobscript.py<span class="w">  </span>master.inputs<span class="w">                                      </span>structure.json
+generic_array_job.sh<span class="w">              </span>parse_report.py<span class="w">                                    </span>transport_data.txt
+index.json<span class="w">                        </span>program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+
+./is_db/run_0:
+chk/<span class="w">    </span>geo/<span class="w">           </span>mpi/<span class="w">             </span>plt/<span class="w">    </span>pout.1<span class="w">  </span>pout.3<span class="w">  </span>program@<span class="w">  </span>restart/
+crash/<span class="w">  </span>master.inputs<span class="w">  </span>parameters.json<span class="w">  </span>pout.0<span class="w">  </span>pout.2<span class="w">  </span>pout.4<span class="w">  </span>regrid/<span class="w">   </span>transport_data.txt
+
+./study0:
+Analyze.py<span class="w">                   </span>generic_array_job.sh<span class="w">  </span>parse_report.py
+array_job_id<span class="w">                 </span>inception_stepper@<span class="w">    </span>plasma_jobscript.py
+chemistry.json<span class="w">               </span>index.json<span class="w">            </span>program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+config_util.py<span class="w">               </span>jobscript_symlink@<span class="w">    </span>run_0/
+detachment_rate.dat<span class="w">          </span>json_requirement.py<span class="w">   </span>structure.json
+electron_transport_data.dat<span class="w">  </span>master.inputs
+
+./study0/run_0:
+Analyze.py<span class="w">      </span>detachment_rate.dat<span class="w">          </span>generic_array_job.sh<span class="w">  </span>parameters.json
+chemistry.json<span class="w">  </span>electron_transport_data.dat<span class="w">  </span>master.inputs<span class="w">         </span>program@
+</pre></div>
+</div>
+<p>Do notice:</p>
+<ul>
+<li><p>The rather self-explainatory named <code class="docutils literal notranslate"><span class="pre">jobscript_symlink</span></code> symlink pointing to the jobscripts:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>output-dir/is_db$<span class="w"> </span>readlink<span class="w"> </span>jobscript_symlink
+discharge_inception_jobscript.py
+
+output-dir/study0$<span class="w"> </span>readlink<span class="w"> </span>jobscript_symlink
+plasma_jobscript.py
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">study0/inception_stepper</span></code> symlink pointing across the file hierarchy:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>output-dir/study0$<span class="w"> </span>readlink<span class="w"> </span>inception_stepper
+../is_db
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">program</span></code> symlinks in the <em>“run_</em>”* sub-directories. These point to the actual executable in their respective parent directories.</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>output-dir/is_db/run_0$<span class="w"> </span>readlink<span class="w"> </span>program
+../program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>A job-script typically receives an array job index from slurm (through the environment variable <code class="docutils literal notranslate"><span class="pre">$SLURM_ARRAY_TASK_ID</span></code>), and must use this to find the relevant parameters, dependent databases, get structural metadata and enter its own run-subdirectory and execute code there.</p></li>
+<li><p>For each database/study there are certain metadata files that are generated to make it possible to programatically traverse the created file-hierarchy from within the jobscripts or from within post-simulation analysis scripts. These files becomes especially imortant when the second-level studies have to traverse the databases’ result hierarchies to retrieve and parse database results before launching their own slurm jobs.</p>
+<blockquote>
+<div><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sometimes, one need to manipulate simulation input files directly from the job-scripts, e.g. to change some parameter depending on a <em>database</em> result. Python utility functions are provided to manipulate configuration files on-the-fly in this intermediate step. C.f. examples in the <a class="reference internal" href="../Jobscripts.html#ex-database"><span class="std std-ref">Database-dependent jobscript examples</span></a> for usage.</p>
+</div>
+<p>Generated files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">array_job_id</span></code> containing a single integer; the slurm array job id for the this database/study</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">index.json</span></code>, containing a mapping between specific array job indices and all parameter sets for this database/study</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">structure.json</span></code> a parsed dump of the overall structure of the database/study. This matches a parsed export of the corresponding section in the original <cite>run_definition</cite>. Included both for data consistency and for usage by the jobscripts to get extra metadata for setting up batch jobs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_*/parameters.json</span></code> containing the actual parameter space point for that run.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p>The <cite>configurator.py</cite> script contains helper code to in-place manipulate both <cite>.*inputs</cite> files (normally used to specify chombo-discharge parameters), as well as generic structured <cite>.json</cite> files (e.g. used by chombo-discharge or physical/chemical data input.</p>
+<section id="defining-parameter-spaces">
+<span id="param-space"></span><h2>Defining Parameter Spaces<a class="headerlink" href="#defining-parameter-spaces" title="Permalink to this heading"></a></h2>
+<p>A parameter space is a dictionary where the uniquely named keys (also dictionaries) are the parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;parameter_space&quot;</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="s2">&quot;parameter_name_0&quot;</span><span class="p">:{</span>
+             <span class="o">...</span>
+         <span class="p">},</span>
+         <span class="s2">&quot;another_descriptive_parameter_name&quot;</span><span class="p">:{</span>
+             <span class="o">...</span>
+         <span class="p">},</span>
+         <span class="s2">&quot;some_other_parameter_name&quot;</span><span class="p">:{</span>
+             <span class="o">...</span>
+         <span class="p">}</span>
+     <span class="p">}</span>
+</pre></div>
+</div>
+<p>Each parameter can contain several fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">database</span></code>: unique identifier referencing a database study. This specifies that this parameter is used in a database, and hence that this study depends on the referenced database</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target</span></code>: the file target (either <code class="docutils literal notranslate"><span class="pre">*.json</span></code> or <code class="docutils literal notranslate"><span class="pre">*.inputs</span></code> files))</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">uri</span></code>: (abbr. of <em>Uniform Resource Identifier</em>); the address to the resource you want to change within the target file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">values</span></code>: <code class="docutils literal notranslate"><span class="pre">list()</span></code>/<code class="docutils literal notranslate"><span class="pre">[]</span></code> of values. Scalars should be written as <code class="docutils literal notranslate"><span class="pre">[scalar-value]</span></code>. Depending on the uri, this can be a 2nd order list (list of lists) if the uri references several uri endpoints. In that case the parameter will change two or more uri targets at the same time.</p></li>
+</ul>
+<p>Continuing the example from the previous section:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">directory structure example cont…</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">inception_stepper</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="s1">&#39;inception_stepper&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;output_directory&#39;</span><span class="p">:</span> <span class="s1">&#39;is_db&#39;</span><span class="p">,</span>
+    <span class="o">..</span>
+    <span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;DischargeInception.pressure&quot;</span>
+            <span class="p">},</span>
+        <span class="s2">&quot;geometry_radius&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;Rod.radius&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<span class="n">plasma_study</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;identifier&#39;</span><span class="p">:</span> <span class="s1">&#39;photoion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;output_directory&#39;</span><span class="p">:</span> <span class="s1">&#39;study0&#39;</span><span class="p">,</span>
+    <span class="o">...</span>
+    <span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;geometry_radius&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;inception_stepper&quot;</span><span class="p">,</span>  <span class="c1"># database dependency</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;Rod.radius&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">2e-3</span><span class="p">,</span> <span class="mf">3e-3</span><span class="p">]</span>
+            <span class="p">},</span>
+        <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;inception_stepper&quot;</span><span class="p">,</span>  <span class="c1"># database dependency</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;chemistry.json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;gas&quot;</span><span class="p">,</span> <span class="s2">&quot;law&quot;</span><span class="p">,</span> <span class="s2">&quot;ideal_gas&quot;</span><span class="p">,</span> <span class="s2">&quot;pressure&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">1e5</span><span class="p">,</span> <span class="mf">11e5</span><span class="p">,</span> <span class="mf">1e5</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="p">},</span>
+        <span class="s2">&quot;photoionization&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;chemistry.json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;photoionization&quot;</span><span class="p">,</span>
+                <span class="p">[</span>
+                    <span class="s1">&#39;+[&quot;reaction&quot;=&lt;chem_react&gt;&quot;Y + (O2) -&gt; e + O2+&quot;]&#39;</span><span class="p">,</span>  <span class="c1"># non-optional match</span>
+                    <span class="s1">&#39;*[&quot;reaction&quot;=&lt;chem_react&gt;&quot;Y + (O2) -&gt; (null)&quot;]&#39;</span>  <span class="c1"># optional match (create-if-not-exists)</span>
+                    <span class="p">],</span>
+                <span class="s2">&quot;efficiency&quot;</span>
+                <span class="p">],</span>
+            <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]]</span>  <span class="c1">#[[float(v), float(1.0-v)] for v in np.arange(0.0, 1.0, 1.0)]</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+<span class="n">top_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">databases</span><span class="o">=</span><span class="p">[</span><span class="n">inception_stepper</span><span class="p">],</span>
+        <span class="n">studies</span><span class="o">=</span><span class="p">[</span><span class="n">plasma_study</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>The actual parameter values are typically specified for the top study definition, not the databases. The database only specifies where changes are to be made for a given value.</p>
+<p>In this example there are several distinctly named parameters changing different aspects of the simulations:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">geometry_radius</span></code>:</p>
+<blockquote>
+<div><p>Marked as dependent on the database; meaning that this study will run after the database study.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Both the database and the study has the same <code class="docutils literal notranslate"><span class="pre">target</span></code> file name and <code class="docutils literal notranslate"><span class="pre">uri</span></code> field, namely the <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> chombo-discharge input file and its <code class="docutils literal notranslate"><span class="pre">Rod.radius</span></code> field. Note that these are now different files residing within the output directory file hierarchy.</p>
+</div>
+<p>This parameter contributes a factor 3 to the overall parameter space size.</p>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pressure</span></code>:</p>
+<blockquote>
+<div><p>List of values (Evaluates to <code class="docutils literal notranslate"><span class="pre">[100000.0,</span> <span class="pre">200000.0,</span> <span class="pre">...,</span> <span class="pre">900000.0,</span> <span class="pre">1000000.0]</span></code>).</p>
+<p>The database will write this parameter to the <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> file by changing the <code class="docutils literal notranslate"><span class="pre">DischargeInception.pressure</span></code> (uri-field) input parameter, while the study has a different target, utilizing the json-writing capabilities to change the <code class="docutils literal notranslate"><span class="pre">pressure</span></code> field in the json hierarchy according to the list in the uri-field.</p>
+<p>This parameter contributes a factor 10 to the overall parameter space size.</p>
+</div></blockquote>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">photoionization</span></code>:</p>
+<blockquote>
+<div><p>This is the most complex parameter. It only affects the <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> target in the study.</p>
+<p>As can be seen in the uri specification the second level is a list of length 2. This means that this parameter changes two fields in <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> at the same time. Similarly, the <code class="docutils literal notranslate"><span class="pre">values</span></code> field is a double list, where the first element of each contained list will be written to the uri of the first target field and the second element of each contained list will be written to the uri of the second target field.</p>
+<p>This, the value <code class="docutils literal notranslate"><span class="pre">[[1.0,</span> <span class="pre">0.0]]</span></code> is to be regarded as a scalar quantity in the parameter space, and this parameter contributes a factor 1 to the overall parameter space size (not really affecting it).</p>
+<p>The resulting change for the runs in <cite>study0/run_*/chemistry.json</cite> will be:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">resulting chemistry.json</span><a class="headerlink" href="#id3" title="Permalink to this code"></a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s2">&quot;photoionization&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;Y + (O2) -&gt; e + O2+&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;efficiency&quot;</span><span class="p">:</span> <span class="mf">1.0</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;reaction&quot;</span><span class="p">:</span> <span class="s2">&quot;Y + (O2) -&gt; (null)&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;efficiency&quot;</span><span class="p">:</span> <span class="mf">0.0</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>For the special syntax encountered see <a class="reference internal" href="#navigating-json"><span class="std std-ref">Navigating JSON object hierarchies</span></a>.</p>
+</div></blockquote>
+</li>
+</ul>
+<section id="navigating-json-object-hierarchies">
+<span id="navigating-json"></span><h3>Navigating JSON object hierarchies<a class="headerlink" href="#navigating-json-object-hierarchies" title="Permalink to this heading"></a></h3>
+<p>The special syntax <code class="docutils literal notranslate"><span class="pre">+[&quot;field-name&quot;=&quot;search-value&quot;]</span></code> and <code class="docutils literal notranslate"><span class="pre">*[&quot;field-name&quot;=&quot;search-value&quot;]</span></code> is used to search a json list for an child object <code class="docutils literal notranslate"><span class="pre">{...}</span></code> containing a specific member <code class="docutils literal notranslate"><span class="pre">&quot;field-name&quot;</span></code> with a specific value “search-value”.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">+[]</span></code> requires the object with the member <code class="docutils literal notranslate"><span class="pre">field-name</span></code> to exist.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">*[]</span></code> will create the object with the member <code class="docutils literal notranslate"><span class="pre">field-name</span></code> if it doesn’t exist.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If searching for an object in a list where the search key itself is an JSON object, <code class="docutils literal notranslate"><span class="pre">search-value</span></code> can be omitted: <code class="docutils literal notranslate"><span class="pre">+[&quot;fields-name&quot;]</span></code>. Remember to repeat the <code class="docutils literal notranslate"><span class="pre">fields-name</span></code> in your uri as the next list element to select that child object if needed.</p>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;parent&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;list-1&quot;</span><span class="p">:[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-0&quot;</span><span class="p">:</span><span class="s2">&quot;value_0&quot;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-1&quot;</span><span class="p">:{</span>
+                    <span class="s2">&quot;target-field&quot;</span><span class="p">:</span><span class="s2">&quot;change-me!&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-2&quot;</span><span class="p">:</span><span class="s2">&quot;value_2&quot;</span>
+            <span class="p">},</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>which can be found with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;uri&quot;</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;parent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;list-1&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;+[&quot;field-name-1&quot;]&#39;</span><span class="p">,</span>  <span class="c1"># this finds the &quot;unnamed&quot; container object</span>
+    <span class="s2">&quot;field-name-1&quot;</span><span class="p">,</span> <span class="c1"># selects the object</span>
+    <span class="s2">&quot;target-field&quot;</span>  <span class="c1"># this is the actual target within the above object</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The special notation <code class="docutils literal notranslate"><span class="pre">&lt;chem_react&gt;</span></code> is a hint to the parser that the value searched for in this specific example should be a valid chombo-discharge chemical reaction, c.f. <a class="reference external" href="https://chombo-discharge.github.io/chombo-discharge/Applications/CdrPlasmaModel.html?highlight=reaction#specifying-reactions">“Specifying reactions” in the Plasma Model</a>. The comparison of the chemical reactions between <code class="docutils literal notranslate"><span class="pre">search-value</span></code> and json file is thus a parsed/semantic comparison.</p>
+</div>
+<p>Navigating a json object hierarchy can sometimes involve having to search through several lists down the tree:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;parent&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;list-level-1&quot;</span><span class="p">:[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-0&quot;</span><span class="p">:</span><span class="s2">&quot;value_0&quot;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-1&quot;</span><span class="p">:</span><span class="s2">&quot;value_1_0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target-field&quot;</span><span class="p">:</span><span class="s2">&quot;dont-you-change-me!&quot;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-1&quot;</span><span class="p">:</span><span class="s2">&quot;value_1_1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target-field&quot;</span><span class="p">:</span><span class="s2">&quot;change-me!&quot;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-2&quot;</span><span class="p">:</span><span class="s2">&quot;value_2&quot;</span>
+            <span class="p">},</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>In the above contrived example, we want to change the third contained object in the list; i.e. the object that has <code class="docutils literal notranslate"><span class="pre">&quot;field-name-1&quot;:&quot;value_1_1&quot;</span></code>. The required parameter space uri would be:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;uri&quot;</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;parent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;list-level-1&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;+[&quot;field-name-1&quot;=&quot;value_1_1&quot;]&#39;</span><span class="p">,</span>  <span class="c1"># this finds the object</span>
+    <span class="s2">&quot;target-field&quot;</span>  <span class="c1"># this is the actual target within the above object</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>A deeper hierarchy with two list levels to traverse:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;parent&quot;</span><span class="p">:{</span>
+        <span class="s2">&quot;list-level-1&quot;</span><span class="p">:[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-0&quot;</span><span class="p">:</span><span class="s2">&quot;value_0&quot;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-1&quot;</span><span class="p">:</span><span class="s2">&quot;value_1_0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target-field&quot;</span><span class="p">:</span><span class="s2">&quot;dont-you-change-me!&quot;</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-1&quot;</span><span class="p">:</span><span class="s2">&quot;value_1_1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target-field&quot;</span><span class="p">:[</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;search-field&quot;</span><span class="o">=</span><span class="s2">&quot;some-value&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;target2-field&quot;</span><span class="p">:</span><span class="s2">&quot;don-try-to-change-me!&quot;</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;search-field&quot;</span><span class="o">=</span><span class="s2">&quot;search-value&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;target2-field&quot;</span><span class="p">:</span><span class="s2">&quot;change-me!&quot;</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;field-name-2&quot;</span><span class="p">:</span><span class="s2">&quot;value_2&quot;</span>
+            <span class="p">},</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;uri&quot;</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;parent&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;list-level-1&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;+[&quot;field-name-1&quot;=&quot;value_1_1&quot;]&#39;</span><span class="p">,</span>  <span class="c1"># find the right object</span>
+    <span class="s2">&quot;target-field&quot;</span><span class="p">,</span>  <span class="c1"># alter this one</span>
+    <span class="s1">&#39;+[&quot;search-field&quot;=&quot;search-value&quot;]&#39;</span><span class="p">,</span>  <span class="c1"># find the right object</span>
+    <span class="s2">&quot;target2-field&quot;</span>  <span class="c1"># target aquired!</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>The corresponding value specification for this parameter in the run_definition should be a single list: <code class="docutils literal notranslate"><span class="pre">&quot;values&quot;=[new-value-0,</span> <span class="pre">new-value-1,</span> <span class="pre">...,</span> <span class="pre">new-value-N]</span></code> contributing a factor <em>N</em> to the parameter space size.</p>
+</section>
+<section id="dummy-parameters">
+<h3>Dummy parameters<a class="headerlink" href="#dummy-parameters" title="Permalink to this heading"></a></h3>
+<p>It is possible to pass <code class="docutils literal notranslate"><span class="pre">dummy</span></code> parameters as a mechanism to set options for the jobscripts. A dummy parameter doesn’t have to specify a target file, only a name and <code class="docutils literal notranslate"><span class="pre">values</span></code>-field, and optionally the <code class="docutils literal notranslate"><span class="pre">database</span></code> field. If the values is a single element the parameter won’t grow the parameter space size, and thus not contributing to an increase in the number of slurm jobs. A dummy parameter will end up in the generated <code class="docutils literal notranslate"><span class="pre">index.json</span></code>, <code class="docutils literal notranslate"><span class="pre">structure.json</span></code> and <code class="docutils literal notranslate"><span class="pre">parameters.json</span></code> files.</p>
+<p>Say, if study’s jobscript needs a configurable parameter we can use a dummy parameter to pass it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">db_study</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s2">&quot;parameter_space&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="o">...</span>  <span class="c1"># no &quot;K_min&quot; parameter here</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">main_study</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="o">...</span>
+    <span class="s2">&quot;parameter_space&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;K_min&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.0</span><span class="p">]</span>
+            <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">top_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">databases</span><span class="o">=</span><span class="p">[</span><span class="n">db_study</span><span class="p">],</span>
+        <span class="n">studies</span><span class="o">=</span><span class="p">[</span><span class="n">main_study</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="OverallDesign.html" class="btn btn-neutral float-left" title="Overall Design" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Jobscripts.html" class="btn btn-neutral float-right" title="Writing Jobscripts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

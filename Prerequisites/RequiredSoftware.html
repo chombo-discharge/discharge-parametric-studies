@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Required Software &mdash; Discharge Parametric Studies 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Local Slurm Installation (Debian/Ubuntu)" href="Example.html" />
+    <link rel="prev" title="Writing Jobscripts" href="../Jobscripts.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Parametric Studies
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/BasicUsage.html">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/OverallDesign.html">Overall Design</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/RunDefinition.html">Run Definition</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Writing jobscripts</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts.html">Writing Jobscripts</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Required Software</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#slurm">Slurm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python">Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Example.html">Local Slurm Installation (Debian/Ubuntu)</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Parametric Studies</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Required Software</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Prerequisites/RequiredSoftware.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="required-software">
+<h1>Required Software<a class="headerlink" href="#required-software" title="Permalink to this heading"></a></h1>
+<section id="slurm">
+<h2>Slurm<a class="headerlink" href="#slurm" title="Permalink to this heading"></a></h2>
+<p><a class="reference external" href="https://slurm.schedmd.com">Slurm</a> (Simple Linux Utility for Resource Management) is an open-source workload manager and job scheduler for Linux clusters. It handles queuing, resource allocation, and execution of batch jobs across one or more compute nodes.</p>
+<p>This project uses Slurm to:</p>
+<ul class="simple">
+<li><p>Submit array jobs (<code class="docutils literal notranslate"><span class="pre">sbatch</span> <span class="pre">--array</span></code>) — each array index maps to one point in the parameter space</p></li>
+<li><p>Enforce job dependencies — database jobs must complete successfully before dependent study jobs are allowed to start</p></li>
+<li><p>Supply <code class="docutils literal notranslate"><span class="pre">$SLURM_ARRAY_TASK_ID</span></code> to jobscripts so they can locate their own parameter set and run directory</p></li>
+</ul>
+<p>Slurm has three main components:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">slurmctld</span></code> — the central controller daemon; manages the job queue and scheduling decisions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">slurmd</span></code> — the compute node daemon; executes jobs as directed by the controller</p></li>
+<li><p>Client tools (<code class="docutils literal notranslate"><span class="pre">sbatch</span></code>, <code class="docutils literal notranslate"><span class="pre">squeue</span></code>, <code class="docutils literal notranslate"><span class="pre">sinfo</span></code>, <code class="docutils literal notranslate"><span class="pre">scancel</span></code>) — used to submit and monitor jobs</p></li>
+</ul>
+<p><strong>For local testing</strong>, both <code class="docutils literal notranslate"><span class="pre">slurmctld</span></code> and <code class="docutils literal notranslate"><span class="pre">slurmd</span></code> can run on the same machine — a workstation or WSL instance is sufficient for small test runs. See <a class="reference internal" href="Example.html"><span class="doc">Local Slurm Installation (Debian/Ubuntu)</span></a> for a step-by-step setup guide.</p>
+<p><strong>On a cluster</strong>, Slurm is typically pre-installed and managed by system administrators. You need only the client tools and access to an account and partition.</p>
+</section>
+<section id="python">
+<h2>Python<a class="headerlink" href="#python" title="Permalink to this heading"></a></h2>
+<p><em>configurator.py</em> and its helper modules require Python &gt;= 3.13.0. Only standard library modules are used by the configurator itself.</p>
+<p>Certain example analysis scripts in the repository additionally require:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">numpy</span></code></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Jobscripts.html" class="btn btn-neutral float-left" title="Writing Jobscripts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Example.html" class="btn btn-neutral float-right" title="Local Slurm Installation (Debian/Ubuntu)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
