@@ -40,7 +40,7 @@ jobs:
         working-directory: ${{ github.workspace }}/docs
         run: |
           cp -a build/html/* ./
-          mv build/latex/discharge-parametric-studies.pdf ./
+          mv build/latex/dischargeparametricstudies.pdf ./discharge-parametric-studies.pdf
           rm -rf build
 
       - name: Deploy
