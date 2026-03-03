@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y texlive texlive-latex-extra latexmk
-          python3 -m pip install sphinx sphinx_rtd_theme
+          python3 -m pip install sphinx==5.0.0 sphinx_rtd_theme sphinxcontrib-bibtex          
 
       - name: Build HTML documentation
         working-directory: ${{ github.workspace }}/docs
