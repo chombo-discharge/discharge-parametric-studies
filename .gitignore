@@ -47,11 +47,4 @@ MyApplications/*
 scripts/**
 Research/**
 
-docs
-Docs/*
-!Docs/.nojekyll
-!Docs/Sphinx/
-!Docs/doxygen.conf
-!Docs/README.md
-Docs/Sphinx/build
-Docs/**/*.dat
+docs/build
