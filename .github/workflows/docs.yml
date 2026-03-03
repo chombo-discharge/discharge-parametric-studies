@@ -1,0 +1,53 @@
+name: Deploy documentation
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.head_ref }}-docs
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive texlive-latex-extra latexmk
+          python3 -m pip install sphinx sphinx_rtd_theme
+
+      - name: Build HTML documentation
+        working-directory: ${{ github.workspace }}/docs
+        run: make html
+
+      - name: Build PDF documentation
+        working-directory: ${{ github.workspace }}/docs
+        run: make latexpdf
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: docs/build
+
+      - name: Cleanup
+        working-directory: ${{ github.workspace }}/docs
+        run: |
+          cp -a build/html/* ./
+          mv build/latex/discharge-parametric-studies.pdf ./
+          rm -rf build
+
+      - name: Deploy
+        if: github.event_name == 'push' && github.repository == 'chombo-discharge/discharge-parametric-studies' && github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: docs
+          clean: false
