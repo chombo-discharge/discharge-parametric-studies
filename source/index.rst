@@ -32,6 +32,7 @@ Introduction
    :caption: Introduction
    :hidden:
 
+   Introduction/Quickstart
    Introduction/BasicUsage
    Introduction/OverallDesign
    Introduction/RunDefinition      
@@ -55,4 +56,5 @@ Prerequisites
    :hidden:
 
    Prerequisites/RequiredSoftware
-   Prerequisites/Example   
+   Prerequisites/Installation
+   Prerequisites/Example

@@ -1,10 +1,10 @@
 Writing Jobscripts
 ******************
 
-*configurator.py* schedules slurm jobs through `sbatch` expecting the bash script ``generic_array_job.sh``. This should edited to suit the system configuration, and added as a ``job_script_dependency`` to the studies:
+*Configurator.py* schedules slurm jobs through `sbatch` expecting the bash script ``GenericArrayJob.sh``. This should edited to suit the system configuration, and added as a ``job_script_dependency`` to the studies:
 
 .. code-block:: bash
-    :caption: generic_array_job.sh
+    :caption: GenericArrayJob.sh
 
     #!/bin/bash
     # Author André Kapelrud
@@ -45,12 +45,12 @@ The script configures the resource requirements, sets error conditions and loads
 .. note::
     It is possible to submit python scripts to sbatch directly if the python script has the correct shebang (``#! /usr/bin/env python``), the ``#SBATCH``-specific comment directives also works from a python script. Routing through an intermediate bash-script made it somewhat easier to configure module-loading on sigma2.
 
-    A simple way of having two different versions of this bash script is to just make ``generic_array_job.sh`` a symlink to a correct system-tailored version, or even copy it in similar to the way chombo-discharge deals with the library makefiles.
+    A simple way of having two different versions of this bash script is to just make ``GenericArrayJob.sh`` a symlink to a correct system-tailored version, or even copy it in similar to the way chombo-discharge deals with the library makefiles.
 
 Template jobscripts
 -------------------
 
-At this stage the work is not done, because alot of of the heavy lifting has to be done by your jobscripts. Regard the *configurator.py* script as setting up the infrastructure. It is now up to you to start meaningful simulations. This section gives some examples on how to accomplish this.
+At this stage the work is not done, because alot of of the heavy lifting has to be done by your jobscripts. Regard the *Configurator.py* script as setting up the infrastructure. It is now up to you to start meaningful simulations. This section gives some examples on how to accomplish this.
 
 Generic python jobscript example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -58,7 +58,7 @@ Generic python jobscript example
 A vanilla, quite simple python-based jobscript might look like this:
 
 .. code-block:: python
-    :caption: generic_array_job_jobscript.py
+    :caption: GenericArrayJobJobscript.py
     :linenos:
 
     #!/usr/bin/env python
@@ -76,7 +76,7 @@ A vanilla, quite simple python-based jobscript might look like this:
 
     # local imports
     sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-    from config_util import get_slurm_array_task_id
+    from ConfigUtil import get_slurm_array_task_id
 
     if __name__ == '__main__':
 
@@ -109,7 +109,7 @@ A vanilla, quite simple python-based jobscript might look like this:
         if not input_file:
             raise ValueError('missing *.inputs file in run directory')
 
-        cmd = f"mpirun program {input_file} Random.seed={task_id:d}"
+        cmd = f"mpirun main {input_file} Random.seed={task_id:d}"
         log.info(f"cmdstr: '{cmd}'")
         p = subprocess.Popen(cmd, shell=True, executable="/bin/bash")
 
@@ -128,7 +128,7 @@ This section contains two example jobscripts.
 * One for a database where the simulation (chombo discharge) is rerun under some condition.
 * One for a study that needs to extract some dataset from a database and set up sub directories per parameter space run.
 
-The jobscripts depend on two python scripts: ``parse_report.py`` and ``config_util.py`` that needs to be included as ``job_script_dependencies`` in the *run_definition*.
+The jobscripts depend on two python scripts: ``ParseReport.py`` and ``ConfigUtil.py`` that needs to be included as ``job_script_dependencies`` in the *run_definition*.
 
 .. warning::
    These are not *ready-to-run*, but illustrates a concept. For specific examples see the actual source code listings of this project.
@@ -155,8 +155,8 @@ The jobscripts depend on two python scripts: ``parse_report.py`` and ``config_ut
 
     # local imports
     sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-    from parse_report import parse_report_file  # noqa: E402
-    from config_util import (  # noqa: E402
+    from ParseReport import ParseReport_file  # noqa: E402
+    from ConfigUtil import (  # noqa: E402
                              get_slurm_array_task_id,
                              handle_combination,
                              read_input_float_field
@@ -201,11 +201,11 @@ The jobscripts depend on two python scripts: ``parse_report.py`` and ``config_ut
             raise ValueError('missing *.inputs file in run directory')
 
         # We are now ready to run mpi on our chombo-discharge executable
-        # through the program symlink If there are any quirks specific to this
+        # through the main symlink If there are any quirks specific to this
         # invocation that is not taken care of in your *.inputs file, you can add
         # them here:
 
-        cmd = f"mpirun program {input_file} Random.seed={task_id:d} SomeNamespace.variable=QuirkSolution"
+        cmd = f"mpirun main {input_file} Random.seed={task_id:d} SomeNamespace.variable=QuirkSolution"
         log.info(f"cmdstr: '{cmd}'")
         p = subprocess.Popen(cmd, shell=True, executable="/bin/bash")
         while p.poll() is None:
@@ -288,8 +288,8 @@ This is a rather long example where we traverse the database directories to find
 
     # local imports
     sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-    from parse_report import parse_report_file  # noqa: E402
-    from config_util import (  # noqa: E402
+    from ParseReport import ParseReport_file  # noqa: E402
+    from ConfigUtil import (  # noqa: E402
                              copy_files, backup_file,
                              get_slurm_array_task_id,
                              handle_combination,
@@ -407,7 +407,7 @@ This is a rather long example where we traverse the database directories to find
 
         # We utilize helper functions from the configurator to alleviate the burden.
 
-        # We will use the generic_array_job_jobscript.py script at the leaf directory level.
+        # We will use the GenericArrayJobJobscript.py script at the leaf directory level.
         #----------------------------------------------------------------------------
 
         # let us enumerate the interresting data, assuming some known structure:
@@ -434,7 +434,7 @@ This is a rather long example where we traverse the database directories to find
 
         # recreate the generic job-script symlink, so that the actual .sh jobscript work:
         if not os.path.islink('jobscript_symlink'):
-            os.symlink('generic_array_job_jobscript.py', 'jobscript_symlink')
+            os.symlink('GenericArrayJobJobscript.py', 'jobscript_symlink')
 
         # create run directories, copy files, set voltage and parameters, etc.
         for i, row in enum_table:
@@ -452,7 +452,7 @@ This is a rather long example where we traverse the database directories to find
             required_files = [Path(f).name for f in structure['required_files']]
             copy_files(log, required_files, voltage_dir)
 
-            # reuse the combination writing code from the configurator / config_util, by
+            # reuse the combination writing code from the configurator / ConfigUtil, by
             # building a fake combination and parameter space:
             # populate values
             comb_dict = dict(
@@ -474,7 +474,7 @@ This is a rather long example where we traverse the database directories to find
         # all voltage_* directories are now ready, and we can post a (new!) slurm array job:
         cmdstr = f'sbatch --array=0-{len(enum_table)-1} ' + \
                 f'--job-name="{structure["identifier"]}_voltage" ' + \
-                'generic_array_job.sh'
+                'GenericArrayJob.sh'
         log.debug(f'cmd string: \'{cmdstr}\'')
         p = Popen(cmdstr, shell=True, stdout=PIPE, encoding='utf-8')
 

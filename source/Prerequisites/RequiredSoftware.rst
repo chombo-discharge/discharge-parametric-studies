@@ -25,8 +25,7 @@ Slurm has three main components:
 Python
 ======
 
-*configurator.py* and its helper modules require Python >= 3.13.0. Only standard library modules are used by the configurator itself.
+``discharge-ps`` requires Python >= 3.10. See :doc:`Installation` for how to install the package into a virtual environment.
 
-Certain example analysis scripts in the repository additionally require:
-
-* ``numpy``
+``numpy`` is a declared package dependency and is installed automatically by ``pip``.
+Certain example analysis scripts additionally require ``matplotlib`` and ``scipy``, available via the ``plot`` extra (``pip install -e ".[plot]"``).

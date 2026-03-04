@@ -17,7 +17,7 @@ The difference between ``job_script_dependencies`` and ``required_files`` is tha
 - ``required_files`` is typically used for ``*.inputs`` chombo-discharge files, physical/chemical input files like ``*.json`` files, or other plain data files. Sometimes extra python modules or bash-scripts might be needed at the run-level, so use this field to copy those dependencies in.
 - ``job_script_dependencies``, as the name implies, should point to whatever code is needed to configure and submit the actual slurm jobs.
 
-The ``configurator.py`` script will set up directory structures and copy files into place, then launch slurm array jobs over all the configured parameter space referenced in each database. Then the same is repeated for the second-level studies. These second-level slurm array jobs are made dependent on the database jobs, essentially securing that they are run in sequence.
+The ``Configurator.py`` script will set up directory structures and copy files into place, then launch slurm array jobs over all the configured parameter space referenced in each database. Then the same is repeated for the second-level studies. These second-level slurm array jobs are made dependent on the database jobs, essentially securing that they are run in sequence.
 
 .. important::
 
@@ -30,12 +30,12 @@ The ``configurator.py`` script will set up directory structures and copy files i
 
     inception_stepper = {
         'identifier': 'inception_stepper',
-        'output_directory': 'is_db',
-        'program': 'program{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
-        'job_script': 'discharge_inception_jobscript.py',
+        'output_directory': 'PDIV_DB',
+        'program': 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
+        'job_script': 'DischargeInceptionJobscript.py',
         'job_script_dependencies': [
-            'generic_array_job.sh',
-            'parse_report.py',
+            'GenericArrayJob.sh',
+            'ParseReport.py',
             ...
             ],
         'required_files': [
@@ -50,10 +50,10 @@ The ``configurator.py`` script will set up directory structures and copy files i
     plasma_study = {
         'identifier': 'photoion',
         'output_directory': 'study0',
-        'program': 'program{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
-        'job_script': 'plasma_jobscript.py',
+        'program': 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
+        'job_script': 'PlasmaJobscript.py',
         'job_script_dependencies': [
-            'generic_array_job.sh',
+            'GenericArrayJob.sh',
             ...
             ],
         'required_files': [
@@ -84,29 +84,29 @@ Just after issuing this command, when the first slurm job for the database named
 
     $ ls -R --file-type output-dir
     .:
-    is_db/  study0/
+    PDIV_DB/  study0/
 
-    ./is_db:
+    ./PDIV_DB:
     array_job_id                      jobscript_symlink@                                 run_0/
-    discharge_inception_jobscript.py  master.inputs                                      structure.json
-    generic_array_job.sh              parse_report.py                                    transport_data.txt
-    index.json                        program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+    DischargeInceptionJobscript.py  master.inputs                                      structure.json
+    GenericArrayJob.sh              ParseReport.py                                    transport_data.txt
+    index.json                        main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
 
-    ./is_db/run_0:
-    chk/    geo/           mpi/             plt/    pout.1  pout.3  program@  restart/
+    ./PDIV_DB/run_0:
+    chk/    geo/           mpi/             plt/    pout.1  pout.3  main@  restart/
     crash/  master.inputs  parameters.json  pout.0  pout.2  pout.4  regrid/   transport_data.txt
 
     ./study0:
-    Analyze.py                   generic_array_job.sh  parse_report.py
-    array_job_id                 inception_stepper@    plasma_jobscript.py
-    chemistry.json               index.json            program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
-    config_util.py               jobscript_symlink@    run_0/
-    detachment_rate.dat          json_requirement.py   structure.json
+    Analyze.py                   GenericArrayJob.sh  ParseReport.py
+    array_job_id                 inception_stepper@    PlasmaJobscript.py
+    chemistry.json               index.json            main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+    ConfigUtil.py               jobscript_symlink@    run_0/
+    detachment_rate.dat          JsonRequirement.py   structure.json
     electron_transport_data.dat  master.inputs
 
     ./study0/run_0:
-    Analyze.py      detachment_rate.dat          generic_array_job.sh  parameters.json
-    chemistry.json  electron_transport_data.dat  master.inputs         program@
+    Analyze.py      detachment_rate.dat          GenericArrayJob.sh  parameters.json
+    chemistry.json  electron_transport_data.dat  master.inputs         main@
 
 Do notice:
 
@@ -114,25 +114,25 @@ Do notice:
 
     .. code-block:: bash
 
-        output-dir/is_db$ readlink jobscript_symlink
-        discharge_inception_jobscript.py
+        output-dir/PDIV_DB$ readlink jobscript_symlink
+        DischargeInceptionJobscript.py
 
         output-dir/study0$ readlink jobscript_symlink
-        plasma_jobscript.py
+        PlasmaJobscript.py
 
 * The ``study0/inception_stepper`` symlink pointing across the file hierarchy:
 
     .. code-block:: bash
 
         output-dir/study0$ readlink inception_stepper
-        ../is_db
+        ../PDIV_DB
 
-* The ``program`` symlinks in the *"run_*"* sub-directories. These point to the actual executable in their respective parent directories.
+* The ``main`` symlinks in the *"run_*"* sub-directories. These point to the actual executable in their respective parent directories.
 
     .. code-block:: bash
 
-        output-dir/is_db/run_0$ readlink program
-        ../program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+        output-dir/PDIV_DB/run_0$ readlink main
+        ../main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
 
 * A job-script typically receives an array job index from slurm (through the environment variable ``$SLURM_ARRAY_TASK_ID``), and must use this to find the relevant parameters, dependent databases, get structural metadata and enter its own run-subdirectory and execute code there.
 * For each database/study there are certain metadata files that are generated to make it possible to programatically traverse the created file-hierarchy from within the jobscripts or from within post-simulation analysis scripts. These files becomes especially imortant when the second-level studies have to traverse the databases' result hierarchies to retrieve and parse database results before launching their own slurm jobs.
@@ -149,7 +149,7 @@ Do notice:
     * ``run_*/parameters.json`` containing the actual parameter space point for that run.
 
 
-The `configurator.py` script contains helper code to in-place manipulate both `.*inputs` files (normally used to specify chombo-discharge parameters), as well as generic structured `.json` files (e.g. used by chombo-discharge or physical/chemical data input.
+The `Configurator.py` script contains helper code to in-place manipulate both `.*inputs` files (normally used to specify chombo-discharge parameters), as well as generic structured `.json` files (e.g. used by chombo-discharge or physical/chemical data input.
 
 .. _param_space:
 
@@ -188,7 +188,7 @@ Continuing the example from the previous section:
 
     inception_stepper = {
         'identifier': 'inception_stepper',
-        'output_directory': 'is_db',
+        'output_directory': 'PDIV_DB',
         ..
         'parameter_space': {
             "pressure": {

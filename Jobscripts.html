@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="Introduction/Quickstart.html">Quickstart — Rod Case</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/BasicUsage.html">Basic Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/OverallDesign.html">Overall Design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Introduction/RunDefinition.html">Run Definition</a></li>
@@ -65,6 +66,7 @@
 <p class="caption" role="heading"><span class="caption-text">Prerequisites</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Prerequisites/RequiredSoftware.html">Required Software</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Prerequisites/Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Prerequisites/Example.html">Local Slurm Installation (Debian/Ubuntu)</a></li>
 </ul>
 
@@ -94,9 +96,9 @@
              
   <section id="writing-jobscripts">
 <h1>Writing Jobscripts<a class="headerlink" href="#writing-jobscripts" title="Permalink to this heading"></a></h1>
-<p><em>configurator.py</em> schedules slurm jobs through <cite>sbatch</cite> expecting the bash script <code class="docutils literal notranslate"><span class="pre">generic_array_job.sh</span></code>. This should edited to suit the system configuration, and added as a <code class="docutils literal notranslate"><span class="pre">job_script_dependency</span></code> to the studies:</p>
+<p><em>Configurator.py</em> schedules slurm jobs through <cite>sbatch</cite> expecting the bash script <code class="docutils literal notranslate"><span class="pre">GenericArrayJob.sh</span></code>. This should edited to suit the system configuration, and added as a <code class="docutils literal notranslate"><span class="pre">job_script_dependency</span></code> to the studies:</p>
 <div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-text">generic_array_job.sh</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="code-block-caption"><span class="caption-text">GenericArrayJob.sh</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
 <span class="c1"># Author André Kapelrud</span>
 <span class="c1"># Copyright © 2025 SINTEF Energi AS</span>
@@ -137,16 +139,16 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>It is possible to submit python scripts to sbatch directly if the python script has the correct shebang (<code class="docutils literal notranslate"><span class="pre">#!</span> <span class="pre">/usr/bin/env</span> <span class="pre">python</span></code>), the <code class="docutils literal notranslate"><span class="pre">#SBATCH</span></code>-specific comment directives also works from a python script. Routing through an intermediate bash-script made it somewhat easier to configure module-loading on sigma2.</p>
-<p>A simple way of having two different versions of this bash script is to just make <code class="docutils literal notranslate"><span class="pre">generic_array_job.sh</span></code> a symlink to a correct system-tailored version, or even copy it in similar to the way chombo-discharge deals with the library makefiles.</p>
+<p>A simple way of having two different versions of this bash script is to just make <code class="docutils literal notranslate"><span class="pre">GenericArrayJob.sh</span></code> a symlink to a correct system-tailored version, or even copy it in similar to the way chombo-discharge deals with the library makefiles.</p>
 </div>
 <section id="template-jobscripts">
 <h2>Template jobscripts<a class="headerlink" href="#template-jobscripts" title="Permalink to this heading"></a></h2>
-<p>At this stage the work is not done, because alot of of the heavy lifting has to be done by your jobscripts. Regard the <em>configurator.py</em> script as setting up the infrastructure. It is now up to you to start meaningful simulations. This section gives some examples on how to accomplish this.</p>
+<p>At this stage the work is not done, because alot of of the heavy lifting has to be done by your jobscripts. Regard the <em>Configurator.py</em> script as setting up the infrastructure. It is now up to you to start meaningful simulations. This section gives some examples on how to accomplish this.</p>
 <section id="generic-python-jobscript-example">
 <h3>Generic python jobscript example<a class="headerlink" href="#generic-python-jobscript-example" title="Permalink to this heading"></a></h3>
 <p>A vanilla, quite simple python-based jobscript might look like this:</p>
 <div class="literal-block-wrapper docutils container" id="id2">
-<div class="code-block-caption"><span class="caption-text">generic_array_job_jobscript.py</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
+<div class="code-block-caption"><span class="caption-text">GenericArrayJobJobscript.py</span><a class="headerlink" href="#id2" title="Permalink to this code"></a></div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="ch">#!/usr/bin/env python</span>
 <span class="linenos"> 2</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="linenos"> 3</span><span class="sd">Author André Kapelrud</span>
@@ -162,7 +164,7 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="c1"># local imports</span>
 <span class="linenos">15</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>  <span class="c1"># needed for local imports from slurm scripts</span>
-<span class="linenos">16</span><span class="kn">from</span> <span class="nn">config_util</span> <span class="kn">import</span> <span class="n">get_slurm_array_task_id</span>
+<span class="linenos">16</span><span class="kn">from</span> <span class="nn">ConfigUtil</span> <span class="kn">import</span> <span class="n">get_slurm_array_task_id</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 <span class="linenos">19</span>
@@ -195,7 +197,7 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos">46</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">input_file</span><span class="p">:</span>
 <span class="linenos">47</span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;missing *.inputs file in run directory&#39;</span><span class="p">)</span>
 <span class="linenos">48</span>
-<span class="linenos">49</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mpirun program </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2"> Random.seed=</span><span class="si">{</span><span class="n">task_id</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos">49</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mpirun main </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2"> Random.seed=</span><span class="si">{</span><span class="n">task_id</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="linenos">50</span>    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cmdstr: &#39;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 <span class="linenos">51</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;/bin/bash&quot;</span><span class="p">)</span>
 <span class="linenos">52</span>
@@ -214,7 +216,7 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <li><p>One for a database where the simulation (chombo discharge) is rerun under some condition.</p></li>
 <li><p>One for a study that needs to extract some dataset from a database and set up sub directories per parameter space run.</p></li>
 </ul>
-<p>The jobscripts depend on two python scripts: <code class="docutils literal notranslate"><span class="pre">parse_report.py</span></code> and <code class="docutils literal notranslate"><span class="pre">config_util.py</span></code> that needs to be included as <code class="docutils literal notranslate"><span class="pre">job_script_dependencies</span></code> in the <em>run_definition</em>.</p>
+<p>The jobscripts depend on two python scripts: <code class="docutils literal notranslate"><span class="pre">ParseReport.py</span></code> and <code class="docutils literal notranslate"><span class="pre">ConfigUtil.py</span></code> that needs to be included as <code class="docutils literal notranslate"><span class="pre">job_script_dependencies</span></code> in the <em>run_definition</em>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>These are not <em>ready-to-run</em>, but illustrates a concept. For specific examples see the actual source code listings of this project.</p>
@@ -239,8 +241,8 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos"> 16</span>
 <span class="linenos"> 17</span><span class="c1"># local imports</span>
 <span class="linenos"> 18</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>  <span class="c1"># needed for local imports from slurm scripts</span>
-<span class="linenos"> 19</span><span class="kn">from</span> <span class="nn">parse_report</span> <span class="kn">import</span> <span class="n">parse_report_file</span>  <span class="c1"># noqa: E402</span>
-<span class="linenos"> 20</span><span class="kn">from</span> <span class="nn">config_util</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: E402</span>
+<span class="linenos"> 19</span><span class="kn">from</span> <span class="nn">ParseReport</span> <span class="kn">import</span> <span class="n">ParseReport_file</span>  <span class="c1"># noqa: E402</span>
+<span class="linenos"> 20</span><span class="kn">from</span> <span class="nn">ConfigUtil</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: E402</span>
 <span class="linenos"> 21</span>                         <span class="n">get_slurm_array_task_id</span><span class="p">,</span>
 <span class="linenos"> 22</span>                         <span class="n">handle_combination</span><span class="p">,</span>
 <span class="linenos"> 23</span>                         <span class="n">read_input_float_field</span>
@@ -285,11 +287,11 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos"> 62</span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;missing *.inputs file in run directory&#39;</span><span class="p">)</span>
 <span class="linenos"> 63</span>
 <span class="linenos"> 64</span>    <span class="c1"># We are now ready to run mpi on our chombo-discharge executable</span>
-<span class="linenos"> 65</span>    <span class="c1"># through the program symlink If there are any quirks specific to this</span>
+<span class="linenos"> 65</span>    <span class="c1"># through the main symlink If there are any quirks specific to this</span>
 <span class="linenos"> 66</span>    <span class="c1"># invocation that is not taken care of in your *.inputs file, you can add</span>
 <span class="linenos"> 67</span>    <span class="c1"># them here:</span>
 <span class="linenos"> 68</span>
-<span class="linenos"> 69</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mpirun program </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2"> Random.seed=</span><span class="si">{</span><span class="n">task_id</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> SomeNamespace.variable=QuirkSolution&quot;</span>
+<span class="linenos"> 69</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;mpirun main </span><span class="si">{</span><span class="n">input_file</span><span class="si">}</span><span class="s2"> Random.seed=</span><span class="si">{</span><span class="n">task_id</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> SomeNamespace.variable=QuirkSolution&quot;</span>
 <span class="linenos"> 70</span>    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cmdstr: &#39;</span><span class="si">{</span><span class="n">cmd</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 <span class="linenos"> 71</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">executable</span><span class="o">=</span><span class="s2">&quot;/bin/bash&quot;</span><span class="p">)</span>
 <span class="linenos"> 72</span>    <span class="k">while</span> <span class="n">p</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -370,8 +372,8 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos"> 18</span>
 <span class="linenos"> 19</span><span class="c1"># local imports</span>
 <span class="linenos"> 20</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>  <span class="c1"># needed for local imports from slurm scripts</span>
-<span class="linenos"> 21</span><span class="kn">from</span> <span class="nn">parse_report</span> <span class="kn">import</span> <span class="n">parse_report_file</span>  <span class="c1"># noqa: E402</span>
-<span class="linenos"> 22</span><span class="kn">from</span> <span class="nn">config_util</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: E402</span>
+<span class="linenos"> 21</span><span class="kn">from</span> <span class="nn">ParseReport</span> <span class="kn">import</span> <span class="n">ParseReport_file</span>  <span class="c1"># noqa: E402</span>
+<span class="linenos"> 22</span><span class="kn">from</span> <span class="nn">ConfigUtil</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: E402</span>
 <span class="linenos"> 23</span>                         <span class="n">copy_files</span><span class="p">,</span> <span class="n">backup_file</span><span class="p">,</span>
 <span class="linenos"> 24</span>                         <span class="n">get_slurm_array_task_id</span><span class="p">,</span>
 <span class="linenos"> 25</span>                         <span class="n">handle_combination</span><span class="p">,</span>
@@ -489,7 +491,7 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos">137</span>
 <span class="linenos">138</span>    <span class="c1"># We utilize helper functions from the configurator to alleviate the burden.</span>
 <span class="linenos">139</span>
-<span class="linenos">140</span>    <span class="c1"># We will use the generic_array_job_jobscript.py script at the leaf directory level.</span>
+<span class="linenos">140</span>    <span class="c1"># We will use the GenericArrayJobJobscript.py script at the leaf directory level.</span>
 <span class="linenos">141</span>    <span class="c1">#----------------------------------------------------------------------------</span>
 <span class="linenos">142</span>
 <span class="linenos">143</span>    <span class="c1"># let us enumerate the interresting data, assuming some known structure:</span>
@@ -516,7 +518,7 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos">164</span>
 <span class="linenos">165</span>    <span class="c1"># recreate the generic job-script symlink, so that the actual .sh jobscript work:</span>
 <span class="linenos">166</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="s1">&#39;jobscript_symlink&#39;</span><span class="p">):</span>
-<span class="linenos">167</span>        <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="s1">&#39;generic_array_job_jobscript.py&#39;</span><span class="p">,</span> <span class="s1">&#39;jobscript_symlink&#39;</span><span class="p">)</span>
+<span class="linenos">167</span>        <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="s1">&#39;GenericArrayJobJobscript.py&#39;</span><span class="p">,</span> <span class="s1">&#39;jobscript_symlink&#39;</span><span class="p">)</span>
 <span class="linenos">168</span>
 <span class="linenos">169</span>    <span class="c1"># create run directories, copy files, set voltage and parameters, etc.</span>
 <span class="linenos">170</span>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">enum_table</span><span class="p">:</span>
@@ -534,7 +536,7 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos">182</span>        <span class="n">required_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">structure</span><span class="p">[</span><span class="s1">&#39;required_files&#39;</span><span class="p">]]</span>
 <span class="linenos">183</span>        <span class="n">copy_files</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">required_files</span><span class="p">,</span> <span class="n">voltage_dir</span><span class="p">)</span>
 <span class="linenos">184</span>
-<span class="linenos">185</span>        <span class="c1"># reuse the combination writing code from the configurator / config_util, by</span>
+<span class="linenos">185</span>        <span class="c1"># reuse the combination writing code from the configurator / ConfigUtil, by</span>
 <span class="linenos">186</span>        <span class="c1"># building a fake combination and parameter space:</span>
 <span class="linenos">187</span>        <span class="c1"># populate values</span>
 <span class="linenos">188</span>        <span class="n">comb_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
@@ -556,7 +558,7 @@ python<span class="w"> </span>./jobscript_symlink<span class="w">  </span><span 
 <span class="linenos">204</span>    <span class="c1"># all voltage_* directories are now ready, and we can post a (new!) slurm array job:</span>
 <span class="linenos">205</span>    <span class="n">cmdstr</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;sbatch --array=0-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">enum_table</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="o">+</span> \
 <span class="linenos">206</span>            <span class="sa">f</span><span class="s1">&#39;--job-name=&quot;</span><span class="si">{</span><span class="n">structure</span><span class="p">[</span><span class="s2">&quot;identifier&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">_voltage&quot; &#39;</span> <span class="o">+</span> \
-<span class="linenos">207</span>            <span class="s1">&#39;generic_array_job.sh&#39;</span>
+<span class="linenos">207</span>            <span class="s1">&#39;GenericArrayJob.sh&#39;</span>
 <span class="linenos">208</span>    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cmd string: </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">cmdstr</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
 <span class="linenos">209</span>    <span class="n">p</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">(</span><span class="n">cmdstr</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
 <span class="linenos">210</span>

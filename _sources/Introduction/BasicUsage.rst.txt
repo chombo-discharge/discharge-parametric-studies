@@ -1,14 +1,15 @@
 Basic Usage
 ===========
-The ``configurator.py`` script can be used to set up directory structures and submit slurm jobs for wide parametric sweeps over chombo-discharge based studies.
+After :doc:`installation <../Prerequisites/Installation>`, the ``discharge-ps`` command can be used to set up directory structures and submit slurm jobs for wide parametric sweeps over chombo-discharge based studies.
 
-.. code-block::
+.. code-block:: console
    :caption: Invocation options
-    $ python configurator.py --help
 
-    usage: configurator.py [-h] [--verbose] [--logfile LOGFILE] [--output-dir OUTPUT_DIR]
-                           [--dim DIM]
-                           run_definition
+    $ discharge-ps --help
+
+    usage: discharge-ps [-h] [--verbose] [--logfile LOGFILE] [--output-dir OUTPUT_DIR]
+                        [--dim DIM]
+                        run_definition
 
     Batch script for running user-defined, parametrised chombo-discharge studies.
 

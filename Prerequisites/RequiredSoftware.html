@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Local Slurm Installation (Debian/Ubuntu)" href="Example.html" />
+    <link rel="next" title="Installation" href="Installation.html" />
     <link rel="prev" title="Writing Jobscripts" href="../Jobscripts.html" /> 
 </head>
 
@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../Introduction/Quickstart.html">Quickstart — Rod Case</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Introduction/BasicUsage.html">Basic Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Introduction/OverallDesign.html">Overall Design</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Introduction/RunDefinition.html">Run Definition</a></li>
@@ -61,6 +62,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#python">Python</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example.html">Local Slurm Installation (Debian/Ubuntu)</a></li>
 </ul>
 
@@ -110,11 +112,9 @@
 </section>
 <section id="python">
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this heading"></a></h2>
-<p><em>configurator.py</em> and its helper modules require Python &gt;= 3.13.0. Only standard library modules are used by the configurator itself.</p>
-<p>Certain example analysis scripts in the repository additionally require:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">numpy</span></code></p></li>
-</ul>
+<p><code class="docutils literal notranslate"><span class="pre">discharge-ps</span></code> requires Python &gt;= 3.10. See <a class="reference internal" href="Installation.html"><span class="doc">Installation</span></a> for how to install the package into a virtual environment.</p>
+<p><code class="docutils literal notranslate"><span class="pre">numpy</span></code> is a declared package dependency and is installed automatically by <code class="docutils literal notranslate"><span class="pre">pip</span></code>.
+Certain example analysis scripts additionally require <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> and <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, available via the <code class="docutils literal notranslate"><span class="pre">plot</span></code> extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">&quot;.[plot]&quot;</span></code>).</p>
 </section>
 </section>
 
@@ -123,7 +123,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../Jobscripts.html" class="btn btn-neutral float-left" title="Writing Jobscripts" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Example.html" class="btn btn-neutral float-right" title="Local Slurm Installation (Debian/Ubuntu)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
