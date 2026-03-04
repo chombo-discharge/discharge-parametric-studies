@@ -31,7 +31,7 @@ The ``Configurator.py`` script will set up directory structures and copy files i
     inception_stepper = {
         'identifier': 'inception_stepper',
         'output_directory': 'is_db',
-        'program': 'program{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
+        'program': 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
         'job_script': 'DischargeInceptionJobscript.py',
         'job_script_dependencies': [
             'GenericArrayJob.sh',
@@ -50,7 +50,7 @@ The ``Configurator.py`` script will set up directory structures and copy files i
     plasma_study = {
         'identifier': 'photoion',
         'output_directory': 'study0',
-        'program': 'program{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
+        'program': 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
         'job_script': 'PlasmaJobscript.py',
         'job_script_dependencies': [
             'GenericArrayJob.sh',
@@ -90,23 +90,23 @@ Just after issuing this command, when the first slurm job for the database named
     array_job_id                      jobscript_symlink@                                 run_0/
     DischargeInceptionJobscript.py  master.inputs                                      structure.json
     GenericArrayJob.sh              ParseReport.py                                    transport_data.txt
-    index.json                        program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+    index.json                        main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
 
     ./is_db/run_0:
-    chk/    geo/           mpi/             plt/    pout.1  pout.3  program@  restart/
+    chk/    geo/           mpi/             plt/    pout.1  pout.3  main@  restart/
     crash/  master.inputs  parameters.json  pout.0  pout.2  pout.4  regrid/   transport_data.txt
 
     ./study0:
     Analyze.py                   GenericArrayJob.sh  ParseReport.py
     array_job_id                 inception_stepper@    PlasmaJobscript.py
-    chemistry.json               index.json            program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+    chemistry.json               index.json            main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
     ConfigUtil.py               jobscript_symlink@    run_0/
     detachment_rate.dat          JsonRequirement.py   structure.json
     electron_transport_data.dat  master.inputs
 
     ./study0/run_0:
     Analyze.py      detachment_rate.dat          GenericArrayJob.sh  parameters.json
-    chemistry.json  electron_transport_data.dat  master.inputs         program@
+    chemistry.json  electron_transport_data.dat  master.inputs         main@
 
 Do notice:
 
@@ -127,12 +127,12 @@ Do notice:
         output-dir/study0$ readlink inception_stepper
         ../is_db
 
-* The ``program`` symlinks in the *"run_*"* sub-directories. These point to the actual executable in their respective parent directories.
+* The ``main`` symlinks in the *"run_*"* sub-directories. These point to the actual executable in their respective parent directories.
 
     .. code-block:: bash
 
-        output-dir/is_db/run_0$ readlink program
-        ../program3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+        output-dir/is_db/run_0$ readlink main
+        ../main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
 
 * A job-script typically receives an array job index from slurm (through the environment variable ``$SLURM_ARRAY_TASK_ID``), and must use this to find the relevant parameters, dependent databases, get structural metadata and enter its own run-subdirectory and execute code there.
 * For each database/study there are certain metadata files that are generated to make it possible to programatically traverse the created file-hierarchy from within the jobscripts or from within post-simulation analysis scripts. These files becomes especially imortant when the second-level studies have to traverse the databases' result hierarchies to retrieve and parse database results before launching their own slurm jobs.

@@ -198,9 +198,9 @@ if __name__ == '__main__':
         os.makedirs(voltage_dir, exist_ok=False)
 
         # further symlink program executable
-        link_path = voltage_dir / 'program'
+        link_path = voltage_dir / 'main'
         if not link_path.is_symlink():
-            os.symlink(Path('../program'), link_path)
+            os.symlink(Path('../main'), link_path)
 
         # grab original file names from structure
         required_files = [Path(f).name for f in structure['required_files']]

@@ -151,7 +151,7 @@ def setup_job_dir(log, obj, output_name_pattern, rel_path, output_dir, i, combin
     # create program symlink
     os.symlink(
             Path('..') / Path(obj['program'].format(DIMENSIONALITY=obj['dim'])).name,
-            res_dir / 'program')
+            res_dir / 'main')
 
     # Dump an json file with the parameter space combination.
     # This might not be needed, as the values can be found from other input

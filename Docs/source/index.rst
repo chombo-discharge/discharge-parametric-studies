@@ -32,6 +32,7 @@ Introduction
    :caption: Introduction
    :hidden:
 
+   Introduction/Quickstart
    Introduction/BasicUsage
    Introduction/OverallDesign
    Introduction/RunDefinition      

@@ -109,7 +109,7 @@ A vanilla, quite simple python-based jobscript might look like this:
         if not input_file:
             raise ValueError('missing *.inputs file in run directory')
 
-        cmd = f"mpirun program {input_file} Random.seed={task_id:d}"
+        cmd = f"mpirun main {input_file} Random.seed={task_id:d}"
         log.info(f"cmdstr: '{cmd}'")
         p = subprocess.Popen(cmd, shell=True, executable="/bin/bash")
 
@@ -201,11 +201,11 @@ The jobscripts depend on two python scripts: ``ParseReport.py`` and ``ConfigUtil
             raise ValueError('missing *.inputs file in run directory')
 
         # We are now ready to run mpi on our chombo-discharge executable
-        # through the program symlink If there are any quirks specific to this
+        # through the main symlink If there are any quirks specific to this
         # invocation that is not taken care of in your *.inputs file, you can add
         # them here:
 
-        cmd = f"mpirun program {input_file} Random.seed={task_id:d} SomeNamespace.variable=QuirkSolution"
+        cmd = f"mpirun main {input_file} Random.seed={task_id:d} SomeNamespace.variable=QuirkSolution"
         log.info(f"cmdstr: '{cmd}'")
         p = subprocess.Popen(cmd, shell=True, executable="/bin/bash")
         while p.poll() is None:
