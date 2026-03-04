@@ -16,8 +16,8 @@ import shutil
 
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-from parse_report import parse_report_file  # noqa: E402
-from config_util import (  # noqa: E402
+from ParseReport import parse_report_file  # noqa: E402
+from ConfigUtil import (  # noqa: E402
                          get_slurm_array_task_id,
                          handle_combination, read_input_float_field
                          )

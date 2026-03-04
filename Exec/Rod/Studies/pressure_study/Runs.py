@@ -7,19 +7,19 @@ Copyright © 2025 SINTEF Energi AS
 import json
 import numpy as np
 
-stepper_dir = '../../cases/DischargeInception/Rod/'
-plasma_dir = '../../cases/ItoKMC/StreamerIntegralCriterion/'
+stepper_dir = '../../DischargeInception/'
+plasma_dir = '../../ItoKMC/'
 
 inception_stepper = {
         'identifier': 'inception_stepper',
-        'job_script': '../discharge_inception_jobscript.py',
+        'job_script': '../DischargeInceptionJobscript.py',
         'program': stepper_dir + 'program{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
         'output_directory': 'is_db',
         'job_script_dependencies': [
-            '../../generic_array_job.sh',
-            '../parse_report.py',
-            '../../config_util.py',
-            '../../json_requirement.py'
+            '../../../GenericArrayJob.sh',
+            '../ParseReport.py',
+            '../../../ConfigUtil.py',
+            '../../../JsonRequirement.py'
             ],
         'required_files': [
             'master.inputs',
@@ -44,12 +44,12 @@ inception_stepper = {
 plasma_study_1 = {
         'identifier': 'photoion',
         'program': plasma_dir+'program{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
-        'job_script': '../plasma_jobscript.py',
+        'job_script': '../PlasmaJobscript.py',
         'job_script_dependencies': [
-            '../../generic_array_job.sh',
-            '../parse_report.py',
-            '../../config_util.py',
-            '../../json_requirement.py',
+            '../../../GenericArrayJob.sh',
+            '../ParseReport.py',
+            '../../../ConfigUtil.py',
+            '../../../JsonRequirement.py',
             ],
         'required_files': [
             'master.inputs',
@@ -57,8 +57,8 @@ plasma_study_1 = {
             plasma_dir+'chemistry.json',
             plasma_dir+'detachment_rate.dat',
             plasma_dir+'electron_transport_data.dat',
-            '../../generic_array_job.sh',  # used at voltage step level
-            '../../generic_array_job_jobscript.py'  # used at voltage step level
+            '../../../GenericArrayJob.sh',  # used at voltage step level
+            '../../../GenericArrayJobJobscript.py'  # used at voltage step level
             ],
         'output_directory': 'study0',
         'output_dir_prefix': 'run_',

@@ -1,6 +1,6 @@
 
 TOPTARGETS := all clean
-SUBDIRS := cases/DischargeInception/Rod/ cases/ItoKMC/StreamerIntegralCriterion/
+SUBDIRS := DischargeInception ItoKMC
 
 $(TOPTARGETS): $(SUBDIRS)
 

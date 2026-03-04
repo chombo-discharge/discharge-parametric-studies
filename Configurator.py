@@ -14,7 +14,7 @@ import importlib.util
 import sys
 import re
 
-from config_util import (
+from ConfigUtil import (
         handle_combination, copy_files, get_output_prefix,
         DEFAULT_OUTPUT_DIR_PREFIX
         )
@@ -409,7 +409,7 @@ def schedule_slurm_jobs(log, structure, out_dir, rel_path, sorted_combinations,
     if afterok_joblist:
         cmdstr += f"--dependency=afterok:{','.join([str(j) for j in afterok_joblist])} "
 
-    cmdstr += f'generic_array_job.sh'
+    cmdstr += f'GenericArrayJob.sh'
     log.debug(f'cmd string: \'{cmdstr}\'')
     p = Popen(cmdstr, shell=True, stdout=PIPE, encoding='utf-8')
 

@@ -18,8 +18,8 @@ from pathlib import Path
 
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-from parse_report import parse_report_file  # noqa: E402
-from config_util import (  # noqa: E402
+from ParseReport import parse_report_file  # noqa: E402
+from ConfigUtil import (  # noqa: E402
                          copy_files, backup_file,
                          get_slurm_array_task_id,
                          handle_combination,
@@ -187,7 +187,7 @@ if __name__ == '__main__':
 
     if not os.path.islink('jobscript_symlink'):
         # recreate the generic job-script symlink, so that the actual .sh jobscript work:
-        os.symlink('generic_array_job_jobscript.py', 'jobscript_symlink')
+        os.symlink('GenericArrayJobJobscript.py', 'jobscript_symlink')
 
     # create run directories, copy files, set voltage and particle positions, etc.
     for i, row in enum_table:
@@ -206,7 +206,7 @@ if __name__ == '__main__':
         required_files = [Path(f).name for f in structure['required_files']]
         copy_files(log, required_files, voltage_dir)
 
-        # reuse the combination writing code from the configurator / config_util, by
+        # reuse the combination writing code from the configurator / ConfigUtil, by
         # building a fake combination and parameter space:
         particle_pos = [0.0, row[2][1], 0.0]  # strip X and Z coords
         comb_dict = dict(
@@ -250,7 +250,7 @@ if __name__ == '__main__':
 
     cmdstr = f'sbatch --array=0-{len(enum_table)-1} ' + \
             f'--job-name="{structure["identifier"]}_voltage" ' + \
-            'generic_array_job.sh'
+            'GenericArrayJob.sh'
     log.debug(f'cmd string: \'{cmdstr}\'')
     p = Popen(cmdstr, shell=True, stdout=PIPE, encoding='utf-8')
 

@@ -14,7 +14,7 @@ import sys
 import itertools
 from pathlib import Path
 
-from json_requirement import match_requirement, match_reaction
+from JsonRequirement import match_requirement, match_reaction
 
 DEFAULT_OUTPUT_DIR_PREFIX = 'run_'
 

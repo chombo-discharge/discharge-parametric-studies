@@ -13,7 +13,7 @@ import subprocess
 
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-from config_util import get_slurm_array_task_id
+from ConfigUtil import get_slurm_array_task_id
 
 if __name__ == '__main__':
 

@@ -2,12 +2,12 @@
 A collection of batch and slurm scripts for running multilevel chombo-discharge studies over wide parameter spaces
 
 ## Usage
-The `configurator.py` script can be used to set up directory structures for wide parametric sweeps over chombo-discharge based studies.
+The `Configurator.py` script can be used to set up directory structures for wide parametric sweeps over chombo-discharge based studies.
 
 ```bash
-$ python configurator.py --help
+$ python Configurator.py --help
 
-usage: configurator.py [-h] [--verbose] [--logfile LOGFILE] [--output-dir OUTPUT_DIR]
+usage: Configurator.py [-h] [--verbose] [--logfile LOGFILE] [--output-dir OUTPUT_DIR]
                        [--dim DIM]
                        run_definition
 
