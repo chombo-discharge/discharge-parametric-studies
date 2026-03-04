@@ -30,7 +30,7 @@ The ``Configurator.py`` script will set up directory structures and copy files i
 
     inception_stepper = {
         'identifier': 'inception_stepper',
-        'output_directory': 'is_db',
+        'output_directory': 'PDIV_DB',
         'program': 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
         'job_script': 'DischargeInceptionJobscript.py',
         'job_script_dependencies': [
@@ -84,15 +84,15 @@ Just after issuing this command, when the first slurm job for the database named
 
     $ ls -R --file-type output-dir
     .:
-    is_db/  study0/
+    PDIV_DB/  study0/
 
-    ./is_db:
+    ./PDIV_DB:
     array_job_id                      jobscript_symlink@                                 run_0/
     DischargeInceptionJobscript.py  master.inputs                                      structure.json
     GenericArrayJob.sh              ParseReport.py                                    transport_data.txt
     index.json                        main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
 
-    ./is_db/run_0:
+    ./PDIV_DB/run_0:
     chk/    geo/           mpi/             plt/    pout.1  pout.3  main@  restart/
     crash/  master.inputs  parameters.json  pout.0  pout.2  pout.4  regrid/   transport_data.txt
 
@@ -114,7 +114,7 @@ Do notice:
 
     .. code-block:: bash
 
-        output-dir/is_db$ readlink jobscript_symlink
+        output-dir/PDIV_DB$ readlink jobscript_symlink
         DischargeInceptionJobscript.py
 
         output-dir/study0$ readlink jobscript_symlink
@@ -125,13 +125,13 @@ Do notice:
     .. code-block:: bash
 
         output-dir/study0$ readlink inception_stepper
-        ../is_db
+        ../PDIV_DB
 
 * The ``main`` symlinks in the *"run_*"* sub-directories. These point to the actual executable in their respective parent directories.
 
     .. code-block:: bash
 
-        output-dir/is_db/run_0$ readlink main
+        output-dir/PDIV_DB/run_0$ readlink main
         ../main3d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
 
 * A job-script typically receives an array job index from slurm (through the environment variable ``$SLURM_ARRAY_TASK_ID``), and must use this to find the relevant parameters, dependent databases, get structural metadata and enter its own run-subdirectory and execute code there.
@@ -188,7 +188,7 @@ Continuing the example from the previous section:
 
     inception_stepper = {
         'identifier': 'inception_stepper',
-        'output_directory': 'is_db',
+        'output_directory': 'PDIV_DB',
         ..
         'parameter_space': {
             "pressure": {

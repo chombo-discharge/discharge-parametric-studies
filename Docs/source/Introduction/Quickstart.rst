@@ -97,7 +97,7 @@ Run the Configurator
 .. code-block:: bash
 
     cd Exec/Rod/Studies/pressure_study
-    python ../../../Configurator.py Runs.py \
+    python ../../../../Configurator.py Runs.py \
         --output-dir ~/my_rod_study \
         --dim 2 \
         --verbose
@@ -106,7 +106,7 @@ The Configurator:
 
 1. Creates the output directory tree.
 2. Copies executables, input files, and job scripts into place.
-3. Submits a SLURM array job for the database (``is_db/``).
+3. Submits a SLURM array job for the database (``PDIV_DB/``).
 4. Submits a second SLURM array job for the study (``study0/``), chained to depend on the database job completing first.
 
 The resulting directory layout looks like:
@@ -115,15 +115,15 @@ The resulting directory layout looks like:
 
     $ ls -R --file-type ~/my_rod_study
     .:
-    is_db/  study0/
+    PDIV_DB/  study0/
 
-    ./is_db:
+    ./PDIV_DB:
     array_job_id  DischargeInceptionJobscript.py  GenericArrayJob.sh
     index.json    master.inputs                   ParseReport.py
     main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
     run_0/  structure.json  transport_data.txt
 
-    ./is_db/run_0:
+    ./PDIV_DB/run_0:
     chk/  master.inputs  parameters.json  plt/  pout.*  main@  transport_data.txt
 
     ./study0:
@@ -138,7 +138,7 @@ The resulting directory layout looks like:
 
 .. note::
 
-    ``study0/inception_stepper`` is a symlink pointing to ``../is_db``, giving study job scripts direct access to the database results.
+    ``study0/inception_stepper`` is a symlink pointing to ``../PDIV_DB``, giving study job scripts direct access to the database results.
 
 Monitor jobs
 -------------
@@ -148,7 +148,7 @@ Monitor jobs
     squeue -u $USER
 
     # Check the submitted job IDs
-    cat ~/my_rod_study/is_db/array_job_id     # database job ID
+    cat ~/my_rod_study/PDIV_DB/array_job_id     # database job ID
     cat ~/my_rod_study/study0/array_job_id    # study job ID (depends on above)
 
 Inspect results
@@ -159,7 +159,7 @@ After both jobs complete:
 .. code-block:: bash
 
     # Database results — inception voltage reports
-    ls ~/my_rod_study/is_db/run_*/report.txt
+    ls ~/my_rod_study/PDIV_DB/run_*/report.txt
 
     # Study results — plasma simulation output
     ls ~/my_rod_study/study0/run_*/pout.*

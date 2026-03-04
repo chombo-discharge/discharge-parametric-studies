@@ -14,12 +14,12 @@ inception_stepper = {
         'identifier': 'inception_stepper',
         'job_script': '../DischargeInceptionJobscript.py',
         'program': stepper_dir + 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
-        'output_directory': 'is_db',
+        'output_directory': 'PDIV_DB',
         'job_script_dependencies': [
-            '../../../Util/GenericArrayJob.sh',
+            '../../../../Util/GenericArrayJob.sh',
             '../ParseReport.py',
-            '../../../ConfigUtil.py',
-            '../../../JsonRequirement.py'
+            '../../../../ConfigUtil.py',
+            '../../../../JsonRequirement.py'
             ],
         'required_files': [
             'master.inputs',
@@ -46,10 +46,10 @@ plasma_study_1 = {
         'program': plasma_dir+'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
         'job_script': '../PlasmaJobscript.py',
         'job_script_dependencies': [
-            '../../../Util/GenericArrayJob.sh',
+            '../../../../Util/GenericArrayJob.sh',
             '../ParseReport.py',
-            '../../../ConfigUtil.py',
-            '../../../JsonRequirement.py',
+            '../../../../ConfigUtil.py',
+            '../../../../JsonRequirement.py',
             ],
         'required_files': [
             'master.inputs',
@@ -57,8 +57,8 @@ plasma_study_1 = {
             plasma_dir+'chemistry.json',
             plasma_dir+'detachment_rate.dat',
             plasma_dir+'electron_transport_data.dat',
-            '../../../Util/GenericArrayJob.sh',  # used at voltage step level
-            '../../../GenericArrayJobJobscript.py'  # used at voltage step level
+            '../../../../Util/GenericArrayJob.sh',  # used at voltage step level
+            '../../../../GenericArrayJobJobscript.py'  # used at voltage step level
             ],
         'output_directory': 'study0',
         'output_dir_prefix': 'run_',
