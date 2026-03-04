@@ -114,16 +114,22 @@ The Rod case demonstrates the two-level database → study pipeline: a discharge
 make<span class="w"> </span>-j4
 </pre></div>
 </div>
-<p>This builds two executables:</p>
+<p>This builds a single executable directly in <code class="docutils literal notranslate"><span class="pre">Exec/Rod/</span></code>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">DischargeInception/main{N}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex</span></code> — used for the database (inception voltage) step.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ItoKMC/main{N}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex</span></code> — used for the plasma simulation study step.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">main{N}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex</span></code> — handles <strong>both</strong> the inception-voltage database step and the full plasma simulation step.
+The active mode is selected at runtime via the <code class="docutils literal notranslate"><span class="pre">App.mode</span></code> parameter in the <code class="docutils literal notranslate"><span class="pre">.inputs</span></code> file (<code class="docutils literal notranslate"><span class="pre">inception</span></code> or <code class="docutils literal notranslate"><span class="pre">plasma</span></code>).</p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">{N}</span></code> in the filename is replaced at runtime by the dimensionality specified with <code class="docutils literal notranslate"><span class="pre">--dim</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both pipeline stages share the same <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> as their single source of truth for gas properties and transport data.
+In <code class="docutils literal notranslate"><span class="pre">inception</span></code> mode, alpha and eta are computed via <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON::computeAlpha/computeEta</span></code>, which derives them from the reaction network in <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> — the same path used by the <code class="docutils literal notranslate"><span class="pre">plasma</span></code> mode.
+No separate <code class="docutils literal notranslate"><span class="pre">transport_data.txt</span></code> is needed.</p>
+</div>
 </section>
 <section id="configure-the-parameter-space">
 <h2>Configure the parameter space<a class="headerlink" href="#configure-the-parameter-space" title="Permalink to this heading"></a></h2>
-<p>Open <code class="docutils literal notranslate"><span class="pre">Exec/Rod/Studies/pressure_study/Runs.py</span></code> to inspect or adjust the parameter space.
+<p>Open <code class="docutils literal notranslate"><span class="pre">Exec/Rod/Studies/PressureStudy/Runs.py</span></code> to inspect or adjust the parameter space.
 The top-level structure is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">top_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
         <span class="n">databases</span><span class="o">=</span><span class="p">[</span><span class="n">inception_stepper</span><span class="p">],</span>
@@ -131,11 +137,32 @@ The top-level structure is:</p>
         <span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>Database</strong> (<code class="docutils literal notranslate"><span class="pre">inception_stepper</span></code>) — computes inception voltages over a grid of pressures and rod radii:</p>
+<p>Both studies point to the same binary in the flat <code class="docutils literal notranslate"><span class="pre">Exec/Rod/</span></code> directory:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rod_dir</span> <span class="o">=</span> <span class="s1">&#39;../../&#39;</span>
+
+<span class="n">inception_stepper</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;program&#39;</span><span class="p">:</span> <span class="n">rod_dir</span> <span class="o">+</span> <span class="s1">&#39;main</span><span class="si">{DIMENSIONALITY}</span><span class="s1">d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex&#39;</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+
+<span class="n">plasma_study_1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;program&#39;</span><span class="p">:</span> <span class="n">rod_dir</span> <span class="o">+</span> <span class="s1">&#39;main</span><span class="si">{DIMENSIONALITY}</span><span class="s1">d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex&#39;</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Database</strong> (<code class="docutils literal notranslate"><span class="pre">inception_stepper</span></code>) — computes inception voltages over a grid of pressures and rod radii.
+<code class="docutils literal notranslate"><span class="pre">App_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">inception</span></code> so the binary runs the inception-voltage sweep.
+Pressure is written into <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> so both stages always use the same gas conditions:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;App_mode&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;DischargeInception.pressure&quot;</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;App.mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;inception&quot;</span><span class="p">]</span>
+        <span class="p">},</span>
+    <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;chemistry.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;gas&quot;</span><span class="p">,</span> <span class="s2">&quot;law&quot;</span><span class="p">,</span> <span class="s2">&quot;ideal_gas&quot;</span><span class="p">,</span> <span class="s2">&quot;pressure&quot;</span><span class="p">]</span>
         <span class="p">},</span>
     <span class="s2">&quot;geometry_radius&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
@@ -148,8 +175,14 @@ The top-level structure is:</p>
     <span class="p">}</span>
 </pre></div>
 </div>
-<p><strong>Study</strong> (<code class="docutils literal notranslate"><span class="pre">plasma_study_1</span></code>) — runs plasma simulations using the database results:</p>
+<p><strong>Study</strong> (<code class="docutils literal notranslate"><span class="pre">plasma_study_1</span></code>) — runs plasma simulations using the database results.
+<code class="docutils literal notranslate"><span class="pre">App_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">plasma</span></code> so the same binary runs the full ItoKMC simulation:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;App_mode&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;App.mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;plasma&quot;</span><span class="p">]</span>
+        <span class="p">},</span>
     <span class="s2">&quot;geometry_radius&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;inception_stepper&quot;</span><span class="p">,</span>
         <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
@@ -174,6 +207,10 @@ The top-level structure is:</p>
         <span class="p">},</span>
     <span class="p">}</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Because both studies write their geometry parameters (e.g. <code class="docutils literal notranslate"><span class="pre">Rod.radius</span></code>) into the <strong>same</strong> <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> template, rod geometry is defined in one place and cannot fall out of sync between the two stages.</p>
 </div>
 <p>Parameters marked with <code class="docutils literal notranslate"><span class="pre">&quot;database&quot;:</span> <span class="pre">&quot;inception_stepper&quot;</span></code> declare a dependency: the study jobs will not start until all database jobs have finished.
 See <a class="reference internal" href="RunDefinition.html"><span class="doc">Run Definition</span></a> for full parameter space syntax.</p>
@@ -203,10 +240,11 @@ PDIV_DB/<span class="w">  </span>study0/
 array_job_id<span class="w">  </span>DischargeInceptionJobscript.py<span class="w">  </span>GenericArrayJob.sh
 index.json<span class="w">    </span>master.inputs<span class="w">                   </span>ParseReport.py
 main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
-run_0/<span class="w">  </span>structure.json<span class="w">  </span>transport_data.txt
+run_0/<span class="w">  </span>structure.json<span class="w">  </span>chemistry.json<span class="w">  </span>electron_transport_data.dat<span class="w">  </span>detachment_rate.dat
 
 ./PDIV_DB/run_0:
-chk/<span class="w">  </span>master.inputs<span class="w">  </span>parameters.json<span class="w">  </span>plt/<span class="w">  </span>pout.*<span class="w">  </span>main@<span class="w">  </span>transport_data.txt
+chk/<span class="w">  </span>master.inputs<span class="w">  </span>parameters.json<span class="w">  </span>plt/<span class="w">  </span>pout.*<span class="w">  </span>main@
+chemistry.json<span class="w">  </span>electron_transport_data.dat<span class="w">  </span>detachment_rate.dat
 
 ./study0:
 array_job_id<span class="w">  </span>chemistry.json<span class="w">  </span>GenericArrayJob.sh<span class="w">  </span>inception_stepper@
@@ -219,9 +257,18 @@ chemistry.json<span class="w">  </span>detachment_rate.dat<span class="w">  </sp
 master.inputs<span class="w">   </span>parameters.json<span class="w">      </span>main@
 </pre></div>
 </div>
+<p>In both stages the <code class="docutils literal notranslate"><span class="pre">main</span></code> symlink points to the same executable from <code class="docutils literal notranslate"><span class="pre">Exec/Rod/</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> files differ only in their <code class="docutils literal notranslate"><span class="pre">App.mode</span></code> line, which the Configurator writes
+automatically: <code class="docutils literal notranslate"><span class="pre">App.mode</span> <span class="pre">=</span> <span class="pre">inception</span></code> in <code class="docutils literal notranslate"><span class="pre">PDIV_DB/</span></code> run directories and <code class="docutils literal notranslate"><span class="pre">App.mode</span> <span class="pre">=</span> <span class="pre">plasma</span></code>
+in <code class="docutils literal notranslate"><span class="pre">study0/</span></code> run directories.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">study0/inception_stepper</span></code> is a symlink pointing to <code class="docutils literal notranslate"><span class="pre">../PDIV_DB</span></code>, giving study job scripts direct access to the database results.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Geometry parameters such as <code class="docutils literal notranslate"><span class="pre">Rod.radius</span></code> appear only in the shared <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> template.
+Both stages read them from the same copy — there is no manual sync required.</p>
 </div>
 </section>
 <section id="monitor-jobs">
