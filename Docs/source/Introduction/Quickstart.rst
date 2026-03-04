@@ -9,6 +9,7 @@ Prerequisites
 
 Before starting, ensure the following are available:
 
+* ``discharge-ps`` must be installed. See :doc:`../Prerequisites/Installation` for instructions.
 * ``DISCHARGE_HOME`` must be set and point to a compiled `chombo-discharge <https://chombo-discharge.github.io/>`_ installation.
 * A SLURM scheduler must be available. See :doc:`../Prerequisites/Example` for a local install example.
 
@@ -96,8 +97,8 @@ Run the Configurator
 
 .. code-block:: bash
 
-    cd Exec/Rod/Studies/pressure_study
-    python ../../../../Configurator.py Runs.py \
+    cd Exec/Rod/Studies/PressureStudy
+    discharge-ps Runs.py \
         --output-dir ~/my_rod_study \
         --dim 2 \
         --verbose

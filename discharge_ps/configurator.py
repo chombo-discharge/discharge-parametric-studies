@@ -14,7 +14,7 @@ import importlib.util
 import sys
 import re
 
-from ConfigUtil import (
+from discharge_ps.config_util import (
         handle_combination, copy_files, get_output_prefix,
         DEFAULT_OUTPUT_DIR_PREFIX
         )

@@ -12,8 +12,7 @@ import logging
 import subprocess
 
 # local imports
-sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-from ConfigUtil import get_slurm_array_task_id
+from discharge_ps.config_util import get_slurm_array_task_id
 
 if __name__ == '__main__':
 

@@ -22,6 +22,10 @@ then
     module load Python/3.11.3-GCCcore-12.3.0
 fi
 
+if [ -n "${DISCHARGE_PS_VENV:-}" ]; then
+    source "$DISCHARGE_PS_VENV/bin/activate"
+fi
+
 python ./jobscript_symlink
 exit $?
 

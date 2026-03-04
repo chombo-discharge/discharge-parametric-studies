@@ -18,8 +18,6 @@ inception_stepper = {
         'job_script_dependencies': [
             '../../../../Util/GenericArrayJob.sh',
             '../ParseReport.py',
-            '../../../../ConfigUtil.py',
-            '../../../../JsonRequirement.py'
             ],
         'required_files': [
             'master.inputs',
@@ -48,8 +46,6 @@ plasma_study_1 = {
         'job_script_dependencies': [
             '../../../../Util/GenericArrayJob.sh',
             '../ParseReport.py',
-            '../../../../ConfigUtil.py',
-            '../../../../JsonRequirement.py',
             ],
         'required_files': [
             'master.inputs',

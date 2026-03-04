@@ -19,7 +19,7 @@ from pathlib import Path
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
 from ParseReport import parse_report_file  # noqa: E402
-from ConfigUtil import (  # noqa: E402
+from discharge_ps.config_util import (  # noqa: E402
                          copy_files, backup_file,
                          get_slurm_array_task_id,
                          handle_combination,

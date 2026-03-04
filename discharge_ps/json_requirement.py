@@ -35,7 +35,7 @@ def match_requirement(suggested: str):
 
     Example
     -------
-    Given a 
+    Given a
     [
         {
             'some_field':'value'

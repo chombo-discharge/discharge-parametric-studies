@@ -8,13 +8,14 @@ Copyright © 2025 SINTEF Energi AS
 import json
 import logging
 import fileinput
+import os
 import re
 import shutil
 import sys
 import itertools
 from pathlib import Path
 
-from JsonRequirement import match_requirement, match_reaction
+from discharge_ps.json_requirement import match_requirement, match_reaction
 
 DEFAULT_OUTPUT_DIR_PREFIX = 'run_'
 

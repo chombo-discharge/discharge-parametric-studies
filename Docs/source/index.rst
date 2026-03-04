@@ -56,4 +56,5 @@ Prerequisites
    :hidden:
 
    Prerequisites/RequiredSoftware
-   Prerequisites/Example   
+   Prerequisites/Installation
+   Prerequisites/Example
