@@ -14,6 +14,17 @@ import subprocess
 # local imports
 from discharge_ps.config_util import get_slurm_array_task_id
 
+
+def _load_slurm_config() -> dict:
+    """Return the [slurm] table from slurm.toml, or {} if not configured."""
+    import tomllib
+    path = os.environ.get('DISCHARGE_PS_SLURM_CONFIG', '')
+    if path and os.path.isfile(path):
+        with open(path, 'rb') as f:
+            return tomllib.load(f).get('slurm', {})
+    return {}
+
+
 if __name__ == '__main__':
 
     log = logging.getLogger(sys.argv[0])
@@ -45,9 +56,12 @@ if __name__ == '__main__':
     if not input_file:
         raise ValueError('missing *.inputs file in run directory')
 
-    cmd = f"mpirun main {input_file} Random.seed={task_id:d}"
+    slurm = _load_slurm_config()
+    mpi = slurm.get('mpi', 'mpirun')
+
+    cmd = f"{mpi} main {input_file} Random.seed={task_id:d}"
     log.info(f"cmdstr: '{cmd}'")
-    p = subprocess.Popen(cmd, shell=True, executable="/bin/bash")
+    p = subprocess.Popen(cmd, shell=True)
 
     while True:
         res = p.poll()

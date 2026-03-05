@@ -28,6 +28,16 @@ from discharge_ps.config_util import (  # noqa: E402
 )
 
 
+def _load_slurm_config() -> dict:
+    """Return the [slurm] table from slurm.toml, or {} if not configured."""
+    import tomllib
+    path = os.environ.get('DISCHARGE_PS_SLURM_CONFIG', '')
+    if path and os.path.isfile(path):
+        with open(path, 'rb') as f:
+            return tomllib.load(f).get('slurm', {})
+    return {}
+
+
 if __name__ == '__main__':
 
     log = logging.getLogger(sys.argv[0])
@@ -253,9 +263,21 @@ if __name__ == '__main__':
         }
         handle_combination(pspace, comb_dict)
 
-    cmdstr = f'sbatch --array=0-{len(enum_table)-1} ' + \
-        f'--job-name="{structure["identifier"]}_voltage" ' + \
-        'GenericArrayJob.sh'
+    slurm = _load_slurm_config()
+    plasma_res = slurm.get('plasma', {})
+
+    sbatch_args = [f'--array=0-{len(enum_table)-1}',
+                   f'--job-name="{structure["identifier"]}_voltage"']
+    if slurm.get('account'):
+        sbatch_args.append(f'--account={slurm["account"]}')
+    if slurm.get('partition'):
+        sbatch_args.append(f'--partition={slurm["partition"]}')
+    if plasma_res.get('ntasks'):
+        sbatch_args.append(f'--ntasks={plasma_res["ntasks"]}')
+    if plasma_res.get('time'):
+        sbatch_args.append(f'--time={plasma_res["time"]}')
+
+    cmdstr = 'sbatch ' + ' '.join(sbatch_args) + ' GenericArrayJob.sh'
     log.debug(f'cmd string: \'{cmdstr}\'')
     p = Popen(cmdstr, shell=True, stdout=PIPE, encoding='utf-8')
 

@@ -22,6 +22,16 @@ from discharge_ps.config_util import (  # noqa: E402
                          handle_combination, read_input_float_field
                          )
 
+
+def _load_slurm_config() -> dict:
+    """Return the [slurm] table from slurm.toml, or {} if not configured."""
+    import tomllib
+    path = os.environ.get('DISCHARGE_PS_SLURM_CONFIG', '')
+    if path and os.path.isfile(path):
+        with open(path, 'rb') as f:
+            return tomllib.load(f).get('slurm', {})
+    return {}
+
 if __name__ == '__main__':
 
     log = logging.getLogger(sys.argv[0])
@@ -61,9 +71,12 @@ if __name__ == '__main__':
     #   file is probably shared with the ItoKMC solver step of the study, so
     #   the DischargeInceptionStepper.mode = stationary is probably going to
     #   cause an error message and a hard abort/panic.
-    cmd = f"mpirun main {input_file} app.mode=inception Random.seed={task_id:d} Driver.max_steps=0 Driver.plot_interval=-1"
+    slurm = _load_slurm_config()
+    mpi = slurm.get('mpi', 'mpirun')
+
+    cmd = f"{mpi} main {input_file} app.mode=inception Random.seed={task_id:d} Driver.max_steps=0 Driver.plot_interval=-1"
     log.info(f"cmdstr: '{cmd}'")
-    p = subprocess.Popen(cmd, shell=True, executable="/bin/bash")
+    p = subprocess.Popen(cmd, shell=True)
     while p.poll() is None:
         time.sleep(0.5)
     # propagate nonzero exit code to calling jobscript
@@ -81,7 +94,7 @@ if __name__ == '__main__':
 
     orig_max_voltage = read_input_float_field(input_file, 'DischargeInceptionTagger.max_voltage')
     if orig_max_voltage is None:
-        raise RuntimeError(f"'{input_file}' does not contain 'DischargeInceptionTagger.max_moltage' field")
+        raise RuntimeError(f"'{input_file}' does not contain 'DischargeInceptionTagger.max_voltage' field")
 
     if orig_max_voltage < calculated_max_voltage:
         log.info('renaming: report.txt -> report.txt.0')
@@ -100,7 +113,7 @@ if __name__ == '__main__':
             }, dict(mesh_max_voltage=new_max_voltage))
 
         log.info('Rerunning DischargeInception calculations')
-        p = subprocess.Popen(cmd, shell=True, executable="/bin/bash")
+        p = subprocess.Popen(cmd, shell=True)
         while p.poll() is None:
             time.sleep(0.5)
         sys.exit(p.returncode)

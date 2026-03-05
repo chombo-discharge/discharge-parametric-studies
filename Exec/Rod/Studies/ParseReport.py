@@ -8,7 +8,18 @@ from itertools import groupby, tee
 import sys
 
 
-def parse_report_file(filename: str, interresting: list[str] = None) -> \
+def _take_vec(iterator, d):
+    assert d > 1
+    vec = []
+    for i in range(d):
+        if i == 0:  # discard leading '(' and trailing ','
+            vec.append(float(next(iterator)[1:-1]))
+        else:  # discard trailing ',' and ')'
+            vec.append(float(next(iterator)[0:-1]))
+    return tuple(vec)
+
+
+def parse_report_file(filename: str, interesting: list[str] = None) -> \
         tuple[list[str], list[tuple[float, list[float]]]]:
     """ Parse an inception stepper report file containing e.g. optimal starting
     positions for electrons
@@ -71,34 +82,24 @@ def parse_report_file(filename: str, interresting: list[str] = None) -> \
                         field = field[1:].lstrip()
                     columns.append(field)
 
-                if interresting is None:
-                    interresting = columns
-
-            def take_vec(iterator, d):
-                assert d > 1
-                vec = []
-                for i in range(d):
-                    if i == 0:  # discard leading '(' and trailing ','
-                        vec.append(float(next(iterator)[1:-1]))
-                    else:  # discard trailing ',' and ')'
-                        vec.append(float(next(iterator)[0:-1]))
-                return tuple(vec)
+                if interesting is None:
+                    interesting = columns
 
             # parse data rows as normal
             res = []
             fields = line.split()
             it = iter(fields)
             for col, d in zip(columns, field_dims):
-                if col in interresting:
+                if col in interesting:
                     if d == 1:
                         res.append(float(next(it)))
                     elif d > 1:
-                        res.append(take_vec(it, d))
+                        res.append(_take_vec(it, d))
                 else:
                     for i in range(d):  # skip ahead
                         next(it)
             A.append(tuple(res))
-        return ([col for col in columns if col in interresting], A)
+        return ([col for col in columns if col in interesting], A)
 
 
 if __name__ == '__main__':
