@@ -54,6 +54,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#run-the-configurator">Run the Configurator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monitor-jobs">Monitor jobs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#inspect-results">Inspect results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#identify-the-settings-for-each-run">Identify the settings for each run</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#post-process">Post-process</a></li>
 </ul>
 </li>
@@ -177,14 +178,10 @@ The top-level structure is:</p>
 </pre></div>
 </div>
 <p><strong>Database</strong> (<code class="docutils literal notranslate"><span class="pre">inception_stepper</span></code>) — computes inception voltages over a grid of pressures and rod radii.
-<code class="docutils literal notranslate"><span class="pre">app.mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">inception</span></code> so the binary runs the inception-voltage sweep.
+<code class="docutils literal notranslate"><span class="pre">app.mode=inception</span></code> is injected on the command line by <code class="docutils literal notranslate"><span class="pre">DischargeInceptionJobscript.py</span></code> at runtime,
+so it is not part of the parameter space.
 Pressure is written into <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> so both stages always use the same gas conditions:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;App_mode&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;app.mode&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;inception&quot;</span><span class="p">]</span>
-        <span class="p">},</span>
     <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;chemistry.json&quot;</span><span class="p">,</span>
         <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;gas&quot;</span><span class="p">,</span> <span class="s2">&quot;law&quot;</span><span class="p">,</span> <span class="s2">&quot;ideal_gas&quot;</span><span class="p">,</span> <span class="s2">&quot;pressure&quot;</span><span class="p">]</span>
@@ -201,11 +198,10 @@ Pressure is written into <code class="docutils literal notranslate"><span class=
 </pre></div>
 </div>
 <p><strong>Study</strong> (<code class="docutils literal notranslate"><span class="pre">plasma_study_1</span></code>) — runs plasma simulations using the database results.
-<code class="docutils literal notranslate"><span class="pre">app.mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">plasma</span></code> so the same binary runs the full ItoKMC simulation.
-The applied voltage is fixed by <code class="docutils literal notranslate"><span class="pre">plasma.voltage</span></code> in <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code>; each run can also
-override it through the parameter space if needed:</p>
+<code class="docutils literal notranslate"><span class="pre">app.mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">plasma</span></code> by its own parameter space entry so the same binary runs the full ItoKMC simulation.
+The applied voltage comes from the inception database results and is set per voltage sub-run:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;App_mode&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;app_mode&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
         <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;app.mode&quot;</span><span class="p">,</span>
         <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;plasma&quot;</span><span class="p">]</span>
@@ -317,6 +313,43 @@ ls<span class="w"> </span>~/my_rod_study/PDIV_DB/run_*/report.txt
 <span class="c1"># Study results — plasma simulation output</span>
 ls<span class="w"> </span>~/my_rod_study/study0/run_*/pout.*
 ls<span class="w"> </span>~/my_rod_study/study0/run_*/plt/
+</pre></div>
+</div>
+</section>
+<section id="identify-the-settings-for-each-run">
+<h2>Identify the settings for each run<a class="headerlink" href="#identify-the-settings-for-each-run" title="Permalink to this heading"></a></h2>
+<p>Each run directory has two files that record its exact parameter values.</p>
+<p><strong>``index.json``</strong> at the top of each stage directory maps integer run index to parameter tuple:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run_&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;keys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;geometry_radius&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;K_max&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;index&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;0&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">100000.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.001</span><span class="p">,</span><span class="w"> </span><span class="mf">12.0</span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">200000.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.001</span><span class="p">,</span><span class="w"> </span><span class="mf">12.0</span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The key order in <code class="docutils literal notranslate"><span class="pre">&quot;keys&quot;</span></code> matches the tuple order in <code class="docutils literal notranslate"><span class="pre">&quot;index&quot;</span></code>, so run <code class="docutils literal notranslate"><span class="pre">run_0</span></code> used
+<code class="docutils literal notranslate"><span class="pre">pressure</span> <span class="pre">=</span> <span class="pre">1e5</span> <span class="pre">Pa</span></code>, <code class="docutils literal notranslate"><span class="pre">Rod.radius</span> <span class="pre">=</span> <span class="pre">1e-3</span> <span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">K_max</span> <span class="pre">=</span> <span class="pre">12</span></code>.</p>
+<p><strong>``parameters.json``</strong> inside every run directory contains the same information as a named dict,
+which is more convenient for direct inspection:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat<span class="w"> </span>~/my_rod_study/PDIV_DB/run_0/parameters.json
+</pre></div>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;pressure&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100000.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;geometry_radius&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.001</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;K_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">12.0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>So <code class="docutils literal notranslate"><span class="pre">PDIV_DB/run_0/report.txt</span></code> was produced with those settings.
+For a quick overview of all runs:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Print settings for every database run</span>
+<span class="k">for</span><span class="w"> </span>d<span class="w"> </span><span class="k">in</span><span class="w"> </span>~/my_rod_study/PDIV_DB/run_*/<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$d</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$d</span><span class="s2">/parameters.json&quot;</span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+<span class="k">done</span>
 </pre></div>
 </div>
 </section>
