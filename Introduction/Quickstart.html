@@ -49,6 +49,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart — Rod Case</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#compile">Compile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-an-example-directly">Run an example directly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configure-the-parameter-space">Configure the parameter space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-the-configurator">Run the Configurator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#monitor-jobs">Monitor jobs</a></li>
@@ -117,7 +118,7 @@ make<span class="w"> </span>-j4
 <p>This builds a single executable directly in <code class="docutils literal notranslate"><span class="pre">Exec/Rod/</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">main{N}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex</span></code> — handles <strong>both</strong> the inception-voltage database step and the full plasma simulation step.
-The active mode is selected at runtime via the <code class="docutils literal notranslate"><span class="pre">App.mode</span></code> parameter in the <code class="docutils literal notranslate"><span class="pre">.inputs</span></code> file (<code class="docutils literal notranslate"><span class="pre">inception</span></code> or <code class="docutils literal notranslate"><span class="pre">plasma</span></code>).</p></li>
+The active mode is selected at runtime via the <code class="docutils literal notranslate"><span class="pre">app.mode</span></code> parameter in the <code class="docutils literal notranslate"><span class="pre">.inputs</span></code> file (<code class="docutils literal notranslate"><span class="pre">inception</span></code> or <code class="docutils literal notranslate"><span class="pre">plasma</span></code>).</p></li>
 </ul>
 <p>The <code class="docutils literal notranslate"><span class="pre">{N}</span></code> in the filename is replaced at runtime by the dimensionality specified with <code class="docutils literal notranslate"><span class="pre">--dim</span></code>.</p>
 <div class="admonition note">
@@ -125,6 +126,30 @@ The active mode is selected at runtime via the <code class="docutils literal not
 <p>Both pipeline stages share the same <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> as their single source of truth for gas properties and transport data.
 In <code class="docutils literal notranslate"><span class="pre">inception</span></code> mode, alpha and eta are computed via <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON::computeAlpha/computeEta</span></code>, which derives them from the reaction network in <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> — the same path used by the <code class="docutils literal notranslate"><span class="pre">plasma</span></code> mode.
 No separate <code class="docutils literal notranslate"><span class="pre">transport_data.txt</span></code> is needed.</p>
+</div>
+</section>
+<section id="run-an-example-directly">
+<h2>Run an example directly<a class="headerlink" href="#run-an-example-directly" title="Permalink to this heading"></a></h2>
+<p>The default <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> sets <code class="docutils literal notranslate"><span class="pre">app.mode</span> <span class="pre">=</span> <span class="pre">inception</span></code>, so the simplest test run is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>Exec/Rod
+mpirun<span class="w"> </span>-n<span class="w"> </span><span class="m">4</span><span class="w"> </span>./main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex<span class="w"> </span>master.inputs
+</pre></div>
+</div>
+<p>This runs a stationary inception-voltage sweep on the default rod geometry at 1 atm.
+Results are written to <code class="docutils literal notranslate"><span class="pre">report.txt</span></code> and plot files to <code class="docutils literal notranslate"><span class="pre">plt/</span></code>.</p>
+<p>To run the plasma simulation instead, override the mode (and optionally the voltage) on the
+command line — Chombo ParmParse arguments passed after the input file take precedence over
+the file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>-n<span class="w"> </span><span class="m">4</span><span class="w"> </span>./main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex<span class="w"> </span>master.inputs<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>app.mode<span class="o">=</span>plasma<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>plasma.voltage<span class="o">=</span>40E3
+</pre></div>
+</div>
+<p>Any <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> key can be overridden this way.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">plasma.voltage</span></code> key sets the constant applied voltage (in V) for the ItoKMC
+plasma simulation.  The inception sweep does not use this value.</p>
 </div>
 </section>
 <section id="configure-the-parameter-space">
@@ -152,12 +177,12 @@ The top-level structure is:</p>
 </pre></div>
 </div>
 <p><strong>Database</strong> (<code class="docutils literal notranslate"><span class="pre">inception_stepper</span></code>) — computes inception voltages over a grid of pressures and rod radii.
-<code class="docutils literal notranslate"><span class="pre">App_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">inception</span></code> so the binary runs the inception-voltage sweep.
+<code class="docutils literal notranslate"><span class="pre">app.mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">inception</span></code> so the binary runs the inception-voltage sweep.
 Pressure is written into <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> so both stages always use the same gas conditions:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">&quot;App_mode&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;App.mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;app.mode&quot;</span><span class="p">,</span>
         <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;inception&quot;</span><span class="p">]</span>
         <span class="p">},</span>
     <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -176,11 +201,13 @@ Pressure is written into <code class="docutils literal notranslate"><span class=
 </pre></div>
 </div>
 <p><strong>Study</strong> (<code class="docutils literal notranslate"><span class="pre">plasma_study_1</span></code>) — runs plasma simulations using the database results.
-<code class="docutils literal notranslate"><span class="pre">App_mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">plasma</span></code> so the same binary runs the full ItoKMC simulation:</p>
+<code class="docutils literal notranslate"><span class="pre">app.mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">plasma</span></code> so the same binary runs the full ItoKMC simulation.
+The applied voltage is fixed by <code class="docutils literal notranslate"><span class="pre">plasma.voltage</span></code> in <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code>; each run can also
+override it through the parameter space if needed:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">&quot;App_mode&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;App.mode&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;app.mode&quot;</span><span class="p">,</span>
         <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;plasma&quot;</span><span class="p">]</span>
         <span class="p">},</span>
     <span class="s2">&quot;geometry_radius&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -258,8 +285,8 @@ master.inputs<span class="w">   </span>parameters.json<span class="w">      </sp
 </pre></div>
 </div>
 <p>In both stages the <code class="docutils literal notranslate"><span class="pre">main</span></code> symlink points to the same executable from <code class="docutils literal notranslate"><span class="pre">Exec/Rod/</span></code>.
-The <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> files differ only in their <code class="docutils literal notranslate"><span class="pre">App.mode</span></code> line, which the Configurator writes
-automatically: <code class="docutils literal notranslate"><span class="pre">App.mode</span> <span class="pre">=</span> <span class="pre">inception</span></code> in <code class="docutils literal notranslate"><span class="pre">PDIV_DB/</span></code> run directories and <code class="docutils literal notranslate"><span class="pre">App.mode</span> <span class="pre">=</span> <span class="pre">plasma</span></code>
+The <code class="docutils literal notranslate"><span class="pre">master.inputs</span></code> files differ only in their <code class="docutils literal notranslate"><span class="pre">app.mode</span></code> line, which the Configurator writes
+automatically: <code class="docutils literal notranslate"><span class="pre">app.mode</span> <span class="pre">=</span> <span class="pre">inception</span></code> in <code class="docutils literal notranslate"><span class="pre">PDIV_DB/</span></code> run directories and <code class="docutils literal notranslate"><span class="pre">app.mode</span> <span class="pre">=</span> <span class="pre">plasma</span></code>
 in <code class="docutils literal notranslate"><span class="pre">study0/</span></code> run directories.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
