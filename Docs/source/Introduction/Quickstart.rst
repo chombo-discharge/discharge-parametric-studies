@@ -24,7 +24,7 @@ Compile
 This builds a single executable directly in ``Exec/Rod/``:
 
 * ``main{N}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex`` — handles **both** the inception-voltage database step and the full plasma simulation step.
-  The active mode is selected at runtime via the ``App.mode`` parameter in the ``.inputs`` file (``inception`` or ``plasma``).
+  The active mode is selected at runtime via the ``app.mode`` parameter in the ``.inputs`` file (``inception`` or ``plasma``).
 
 The ``{N}`` in the filename is replaced at runtime by the dimensionality specified with ``--dim``.
 
@@ -33,6 +33,36 @@ The ``{N}`` in the filename is replaced at runtime by the dimensionality specifi
     Both pipeline stages share the same ``chemistry.json`` as their single source of truth for gas properties and transport data.
     In ``inception`` mode, alpha and eta are computed via ``ItoKMCJSON::computeAlpha/computeEta``, which derives them from the reaction network in ``chemistry.json`` — the same path used by the ``plasma`` mode.
     No separate ``transport_data.txt`` is needed.
+
+Run an example directly
+------------------------
+
+The default ``master.inputs`` sets ``app.mode = inception``, so the simplest test run is:
+
+.. code-block:: bash
+
+    cd Exec/Rod
+    mpirun -n 4 ./main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex master.inputs
+
+This runs a stationary inception-voltage sweep on the default rod geometry at 1 atm.
+Results are written to ``report.txt`` and plot files to ``plt/``.
+
+To run the plasma simulation instead, override the mode (and optionally the voltage) on the
+command line — Chombo ParmParse arguments passed after the input file take precedence over
+the file:
+
+.. code-block:: bash
+
+    mpirun -n 4 ./main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex master.inputs \
+        app.mode=plasma \
+        plasma.voltage=40E3
+
+Any ``master.inputs`` key can be overridden this way.
+
+.. note::
+
+    The ``plasma.voltage`` key sets the constant applied voltage (in V) for the ItoKMC
+    plasma simulation.  The inception sweep does not use this value.
 
 Configure the parameter space
 ------------------------------
@@ -64,7 +94,7 @@ Both studies point to the same binary in the flat ``Exec/Rod/`` directory:
     }
 
 **Database** (``inception_stepper``) — computes inception voltages over a grid of pressures and rod radii.
-``App_mode`` is set to ``inception`` so the binary runs the inception-voltage sweep.
+``app.mode`` is set to ``inception`` so the binary runs the inception-voltage sweep.
 Pressure is written into ``chemistry.json`` so both stages always use the same gas conditions:
 
 .. code-block:: python
@@ -72,7 +102,7 @@ Pressure is written into ``chemistry.json`` so both stages always use the same g
     'parameter_space': {
         "App_mode": {
             "target": "master.inputs",
-            "uri": "App.mode",
+            "uri": "app.mode",
             "values": ["inception"]
             },
         "pressure": {
@@ -90,14 +120,16 @@ Pressure is written into ``chemistry.json`` so both stages always use the same g
         }
 
 **Study** (``plasma_study_1``) — runs plasma simulations using the database results.
-``App_mode`` is set to ``plasma`` so the same binary runs the full ItoKMC simulation:
+``app.mode`` is set to ``plasma`` so the same binary runs the full ItoKMC simulation.
+The applied voltage is fixed by ``plasma.voltage`` in ``master.inputs``; each run can also
+override it through the parameter space if needed:
 
 .. code-block:: python
 
     'parameter_space': {
         "App_mode": {
             "target": "master.inputs",
-            "uri": "App.mode",
+            "uri": "app.mode",
             "values": ["plasma"]
             },
         "geometry_radius": {
@@ -178,8 +210,8 @@ The resulting directory layout looks like:
     master.inputs   parameters.json      main@
 
 In both stages the ``main`` symlink points to the same executable from ``Exec/Rod/``.
-The ``master.inputs`` files differ only in their ``App.mode`` line, which the Configurator writes
-automatically: ``App.mode = inception`` in ``PDIV_DB/`` run directories and ``App.mode = plasma``
+The ``master.inputs`` files differ only in their ``app.mode`` line, which the Configurator writes
+automatically: ``app.mode = inception`` in ``PDIV_DB/`` run directories and ``app.mode = plasma``
 in ``study0/`` run directories.
 
 .. note::
