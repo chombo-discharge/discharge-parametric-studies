@@ -162,7 +162,7 @@ ItoSolver.deposition             = cic                 ## Deposition type.
 ItoSolver.deposition_cf          = transition          ## Coarse-fine deposition. interp, halo, or halo_ngp
 
 # ====================================================================================================
-# SurfaceODESolver solver settings.
+# SurfaceODESolver class options
 # ====================================================================================================
 SurfaceODESolver.verbosity     = -1              ## Chattiness
 SurfaceODESolver.regrid        = conservative    ## Regrid method. 'conservative' or 'arithmetic'
@@ -195,7 +195,7 @@ McPhoto.deposition               = cic              ## 'ngp'  -> nearest grid po
 McPhoto.deposition_cf            = transition       ## Coarse-fine deposition. Must be 'interp' or 'halo'
 
 # ====================================================================================================
-# Rod geometry
+# Rod class options
 # ====================================================================================================
 Rod.radius     = 10E-3            ## Rod radius
 Rod.point2     = 0.0 20E-3 0.0    ## One endpoint
@@ -271,7 +271,7 @@ ItoKMCJSON.exit_tolerance        = 1.E-6       ## Exit tolerance for implicit al
 ItoKMCJSON.algorithm             = midpoint    ## 'ssa', 'tau_plain', 'tau_midpoint', 'hybrid_plain', or 'hybrid_midpoint'
 
 # ====================================================================================================
-# ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
+# ItoKMCStreamerTagger class options
 # ====================================================================================================
 ItoKMCStreamerTagger.verbosity         = -1             ## Verbosity
 ItoKMCStreamerTagger.plot              = false          ## Turn on/off plotting of input fields.
@@ -285,11 +285,6 @@ ItoKMCStreamerTagger.coarsen_curvature     = 1.0e99    ## Curvature coarsening
 ItoKMCStreamerTagger.refine_alpha          = 1.0       ## Set alpha refinement. Lower  => More mesh
 ItoKMCStreamerTagger.coarsen_alpha         = 0.1       ## Set alpha coarsening. Higher => Less mesh
 ItoKMCStreamerTagger.max_coarsen_lvl       = 0         ## Set max coarsening depth
-
-# ====================================================================================================
-# !! BELOW THIS POINT !!
-# Inception Stepper specific options
-# ====================================================================================================
 
 # ====================================================================================================
 # TracerParticleSolver class options

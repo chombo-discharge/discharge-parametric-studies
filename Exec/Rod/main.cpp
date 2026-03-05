@@ -46,9 +46,9 @@ main(int argc, char* argv[])
   temperature = json["gas"]["law"]["ideal_gas"]["temperature"].get<Real>();
   N           = pressure / (Units::kb * temperature);
 
-  RefCountedPtr<TimeStepper>           timeStepper;
+  RefCountedPtr<TimeStepper>           timestepper;
   RefCountedPtr<Driver>                driver;
-  RefCountedPtr<CellTagger>            cellTagger;
+  RefCountedPtr<CellTagger>            celltagger;
   RefCountedPtr<AmrMesh>               amr      = RefCountedPtr<AmrMesh>(new AmrMesh());
   RefCountedPtr<ComputationalGeometry> geometry = RefCountedPtr<ComputationalGeometry>(new Rod());
   RefCountedPtr<ItoKMCPhysics>         physics  = RefCountedPtr<ItoKMCPhysics>(new ItoKMCJSON());
@@ -93,8 +93,8 @@ main(int argc, char* argv[])
     ts->setEta(eta);
     ts->setSecondaryEmission(secondaryEmission);
 
-    timeStepper = ts;
-    cellTagger  = ct;
+    timestepper = ts;
+    celltagger  = ct;
   }
   else if (mode == "plasma") {
     auto ts = RefCountedPtr<ItoKMCStepper<>>(new ItoKMCBackgroundEvaluator<>(physics));
@@ -104,14 +104,14 @@ main(int argc, char* argv[])
       return voltage;
     });
 
-    timeStepper = ts;
-    cellTagger  = ct;
+    timestepper = ts;
+    celltagger  = ct;
   }
   else {
     MayDay::Error("app.mode must be 'inception' or 'plasma'");
   }
 
-  driver = RefCountedPtr<Driver>(new Driver(geometry, timeStepper, amr, cellTagger));
+  driver = RefCountedPtr<Driver>(new Driver(geometry, timestepper, amr, celltagger));
   driver->setupAndRun();
 
   ChomboDischarge::finalize();
