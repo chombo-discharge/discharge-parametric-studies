@@ -5,9 +5,12 @@ Copyright © 2025 SINTEF Energi AS
 """
 
 import json
+import os
 import numpy as np
 
-rod_dir = '../../'
+_di_home = os.environ['DISCHARGE_INCEPTION_HOME']
+
+rod_dir = '../'
 
 # ---------------------------------------------------------------------------
 # URI conventions used in parameter_space entries
@@ -37,12 +40,12 @@ rod_dir = '../../'
 ## PDIV database specifications.
 inception_stepper = {
     'identifier': 'inception_stepper',
-    'job_script': '../DischargeInceptionJobscript.py',
+    'job_script': '../Scripts/DischargeInceptionJobscript.py',
     'program': rod_dir + 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
     'output_directory': 'pdiv_database',
     'job_script_dependencies': [
-        '../../../../Util/GenericArrayJob.sh',
-        '../ParseReport.py',
+        f'{_di_home}/Util/GenericArrayJob.sh',
+        '../Scripts/ParseReport.py',
     ],
     'required_files': [
         rod_dir + 'master.inputs',
@@ -80,19 +83,19 @@ plasma_study_1 = {
     'identifier': 'photoion',
     'enable_study': True,
     'program': rod_dir + 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
-    'job_script': '../PlasmaJobscript.py',
+    'job_script': '../Scripts/PlasmaJobscript.py',
     'job_script_dependencies': [
-        '../../../../Util/GenericArrayJob.sh',
-        '../ParseReport.py',
+        f'{_di_home}/Util/GenericArrayJob.sh',
+        '../Scripts/ParseReport.py',
     ],
     'required_files': [
         rod_dir + 'master.inputs',
         rod_dir + 'chemistry.json',
         rod_dir + 'detachment_rate.dat',
         rod_dir + 'electron_transport_data.dat',
-        rod_dir + 'ion_transport_data.dat',                        
-        '../../../../Util/GenericArrayJob.sh',  # used at voltage step level
-        '../../../../GenericArrayJobJobscript.py'  # used at voltage step level
+        rod_dir + 'ion_transport_data.dat',
+        f'{_di_home}/Util/GenericArrayJob.sh',  # used at voltage step level
+        f'{_di_home}/GenericArrayJobJobscript.py'  # used at voltage step level
     ],
     'output_directory': 'plasma_simulations',
     'output_dir_prefix': 'run_',
