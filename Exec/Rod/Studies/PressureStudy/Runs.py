@@ -61,7 +61,17 @@ inception_stepper = {
             "target": "master.inputs",
             "uri": "DischargeInceptionStepper.limit_max_K",
             "value": 12
-        }        
+        },
+        "max_steps": {
+            "target": "master.inputs",
+            "uri": "Driver.max_steps",
+            "value": 0
+        },
+        "plot_interval": {
+            "target": "master.inputs",
+            "uri": "Driver.plot_interval",
+            "value": -1
+        },
     }
 }
 

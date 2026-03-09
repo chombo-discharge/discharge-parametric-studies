@@ -22,20 +22,12 @@ from discharge_inception.config_util import (  # noqa: E402
 
 if __name__ == '__main__':
 
-    log, task_id, run_dir, input_file = setup_jobscript_logging_and_dir()
+    log, _task_id, run_dir, input_file = setup_jobscript_logging_and_dir()
 
-    # Set some inception stepper only options:
-    #   +Turn off plotting for inception stepper runs. The handling of the HDF5
-    #   output file might create a OOM crash on slurm if the number of K values
-    #   is large.
-    #   +Set Driver.max_steps=0 explicitly to quench a hard abort. The .inputs
-    #   file is probably shared with the ItoKMC solver step of the study, so
-    #   the DischargeInceptionStepper.mode = stationary is probably going to
-    #   cause an error message and a hard abort/panic.
     slurm = load_slurm_config()
     mpi = slurm.get('mpi', 'mpirun')
 
-    cmd = f"{mpi} main {input_file} app.mode=inception Random.seed={task_id:d} Driver.max_steps=0 Driver.plot_interval=-1"
+    cmd = f"{mpi} main {input_file}"
     log.info(f"cmdstr: '{cmd}'")
     p = subprocess.Popen(cmd, shell=True)
     while p.poll() is None:
@@ -58,8 +50,8 @@ if __name__ == '__main__':
         raise RuntimeError(f"'{input_file}' does not contain 'DischargeInceptionTagger.max_voltage' field")
 
     if orig_max_voltage < calculated_max_voltage:
-        log.info('renaming: report.txt -> report.txt.0')
-        shutil.move('report.txt', 'report.txt.0')
+        log.info('renaming: report.txt -> report.txt.bak')
+        shutil.move('report.txt', 'report.txt.bak')
 
         # round up to nearest kV
         new_max_voltage = math.ceil(calculated_max_voltage / 1000) * 1000
