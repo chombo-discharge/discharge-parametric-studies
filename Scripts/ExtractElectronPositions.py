@@ -1,5 +1,28 @@
 #!/usr/bin/env python
 """
+ExtractElectronPositions — parser for inception-stepper report files.
+
+The chombo-discharge inception stepper writes a space-delimited ``report.txt``
+after each simulation run. Each row records scalar and vector quantities for a
+given simulation step, including the applied voltage, the peak ionisation
+coefficients K(+) and K(-), and the spatial positions of those peaks.
+
+This module provides :func:`parse_report_file`, which reads such a file and
+returns the requested columns as a typed list of tuples. It handles:
+
+- Comment lines (``#``-prefixed) used for the column header
+- Mixed scalar / vector columns (vectors formatted as ``(x, y, z)``)
+- Automatic detection of vector dimensionality from the first data row
+- Optional column filtering via the ``interesting`` parameter
+
+Typical usage::
+
+    from ExtractElectronPositions import parse_report_file
+
+    columns, rows = parse_report_file(
+        'report.txt',
+        interesting=['+/- Voltage', 'Max K(+)', 'Pos. max K(+)'])
+
 Author André Kapelrud
 Copyright © 2025 SINTEF Energi AS
 """

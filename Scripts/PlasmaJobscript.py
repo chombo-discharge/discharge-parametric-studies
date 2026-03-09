@@ -16,7 +16,7 @@ from pathlib import Path
 
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-from ParseReport import parse_report_file  # noqa: E402
+from ExtractElectronPositions import parse_report_file  # noqa: E402
 from discharge_inception.config_util import (  # noqa: E402
     copy_files, backup_file, backup_dir,
     read_input_float_field,

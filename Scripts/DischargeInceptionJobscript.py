@@ -13,7 +13,7 @@ import time
 
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
-from ParseReport import parse_report_file  # noqa: E402
+from ExtractElectronPositions import parse_report_file  # noqa: E402
 from discharge_inception.config_util import (  # noqa: E402
     setup_jobscript_logging_and_dir, load_slurm_config,
     handle_combination, read_input_float_field,
