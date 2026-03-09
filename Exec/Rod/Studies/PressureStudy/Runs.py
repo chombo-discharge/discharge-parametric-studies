@@ -34,6 +34,7 @@ rod_dir = '../../'
 #                  with the corresponding inception-voltage database entry.
 # ---------------------------------------------------------------------------
 
+## PDIV database specifications.
 inception_stepper = {
     'identifier': 'inception_stepper',
     'job_script': '../DischargeInceptionJobscript.py',
@@ -50,24 +51,18 @@ inception_stepper = {
         rod_dir + 'ion_transport_data.dat',            
         rod_dir + 'detachment_rate.dat',
     ],
-    'parameter_space': {
-        "pressure": {
-            "target": "chemistry.json",
-            "uri": ["gas", "law", "ideal_gas", "pressure"]
-        },
-        "geometry_radius": {
-            "target": "master.inputs",
-            "uri": "Rod.radius",
-        },
-        'K_max': {
-            "target": "master.inputs",
-            "uri": "DischargeInceptionStepper.limit_max_K"
+    'input_overrides': {
+        'max_amr_depth': {
+            'target': 'master.inputs',
+            'uri': 'AmrMesh.max_amr_depth',
+            'value': 3
         }
     }
 }
 
 plasma_study_1 = {
     'identifier': 'photoion',
+    'enable_study': True,
     'program': rod_dir + 'main{DIMENSIONALITY}d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex',
     'job_script': '../PlasmaJobscript.py',
     'job_script_dependencies': [
@@ -95,7 +90,12 @@ plasma_study_1 = {
             "database": "inception_stepper",  # database dependency
             "target": "master.inputs",
             "uri": "Rod.radius",
-            "values": [1e-3] #, 2e-3, 3e-3]
+            "values": [100E-6, 500E-6, 1e-3] #, 2e-3, 3e-3]
+        },
+        "limit_max_K": {
+            "target": "master.inputs",
+            "uri": "DischargeInceptionStepper.limit_max_K",
+            "values": [12]
         },
         "pressure": {
             "database": "inception_stepper",  # database dependency

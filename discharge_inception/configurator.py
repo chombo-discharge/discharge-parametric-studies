@@ -167,6 +167,11 @@ def setup_job_dir(log, obj, output_name_pattern, rel_path, output_dir, i, combin
     # update the *.json and *.inputs target files in the run directory from the
     # parameter space
     handle_combination(pspace, comb_dict)
+    if 'input_overrides' in obj:
+        override_pspace = {k: {f: v[f] for f in ('target', 'uri') if f in v}
+                           for k, v in obj['input_overrides'].items()}
+        override_comb = {k: v['value'] for k, v in obj['input_overrides'].items()}
+        handle_combination(override_pspace, override_comb)
     os.chdir(cwd)
 
 
@@ -223,6 +228,29 @@ def setup(log,
     if not isinstance(structure['studies'], list):
         raise ValueError("'studies' should be a list")
 
+    # Pre-pass: collect target/uri from db-linked study parameters so that
+    # database entries can omit those fields and have them inferred automatically.
+    db_param_specs = {}  # {db_id: {param_key: {target, uri}}}
+    for study in structure.get('studies', []):
+        if not study.get('enable_study', True):
+            continue
+        for key, param_def in study.get('parameter_space', {}).items():
+            if 'database' not in param_def:
+                continue
+            db_id = param_def['database']
+            if key not in db_param_specs.setdefault(db_id, {}):
+                spec = {f: param_def[f] for f in ('target', 'uri') if f in param_def}
+                db_param_specs[db_id][key] = spec  # always register, even dummies
+
+    for db in structure.get('databases', []):
+        db_id = db['identifier']
+        for key, inferred in db_param_specs.get(db_id, {}).items():
+            param_def = db.setdefault('parameter_space', {}).setdefault(key, {})
+            for field in ('target', 'uri'):
+                if field not in param_def and field in inferred:
+                    param_def[field] = inferred[field]
+                    log.debug(f"db '{db_id}': inferred '{field}' for '{key}' from study")
+
     log.debug(f"Creating output directory '{output_dir}' (if not exists)")
     os.makedirs(output_dir, exist_ok=False)  # yes, crap out if it exists
 
@@ -262,6 +290,9 @@ def setup(log,
     log.info(LOG_SPACER_STR)
     studies = dict()
     for study in structure['studies']:
+        if not study.get('enable_study', True):
+            log.info(f"Skipping disabled study: '{study.get('identifier', '?')}'")
+            continue
         study['dim'] = dim
         missing_fields = verify_fields(study)
         if missing_fields:
