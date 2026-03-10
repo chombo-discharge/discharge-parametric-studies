@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 ExtractElectronPositions — parser for inception-stepper report files.
 
@@ -27,11 +28,41 @@ Author André Kapelrud
 Copyright © 2025 SINTEF Energi AS
 """
 
-from itertools import groupby, tee
 import sys
+from itertools import groupby, tee
 
 
 def _take_vec(iterator, d):
+    """Consume *d* tokens from *iterator* and return them as a float tuple.
+
+    The inception-stepper report file encodes spatial vectors as a sequence of
+    whitespace-separated tokens with embedded punctuation, for example a 3-D
+    vector ``(1.0, 2.0, 3.0,)`` appears as three adjacent tokens::
+
+        (1.0,   2.0,   3.0,)
+
+    The leading ``(`` is attached to the first token and the trailing ``)`` is
+    attached to the last token (which also carries a trailing ``,``).  Interior
+    tokens each carry a trailing ``,``.
+
+    Parameters
+    ----------
+    iterator : iterator of str
+        Token stream positioned immediately before the first component of the
+        vector.  Exactly *d* tokens are consumed.
+    d : int
+        Number of components (dimensionality).  Must be greater than 1.
+
+    Returns
+    -------
+    tuple of float
+        The *d* floating-point components of the vector.
+
+    Raises
+    ------
+    AssertionError
+        If *d* is not greater than 1.
+    """
     assert d > 1
     vec = []
     for i in range(d):
@@ -42,10 +73,36 @@ def _take_vec(iterator, d):
     return tuple(vec)
 
 
-def parse_report_file(filename: str, interesting: list[str] = None) -> \
-        tuple[list[str], list[tuple[float, list[float]]]]:
-    """ Parse an inception stepper report file containing e.g. optimal starting
-    positions for electrons
+def parse_report_file(
+    filename: str,
+    interesting: list[str] = None,
+) -> tuple[list[str], list[tuple[float, list[float]]]]:
+    """Parse an inception stepper report file containing e.g. optimal starting
+    positions for electrons.
+
+    The file mixes comment lines (``#``-prefixed) with space-delimited data
+    rows.  The column header is taken from the second-to-last comment block
+    preceding the first data row.  Vectors are stored as ``(x, y, z,)``-style
+    token sequences; their dimensionality is auto-detected from the first data
+    row and assumed to be consistent throughout the file.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the ``report.txt`` file produced by the inception stepper.
+    interesting : list of str, optional
+        Column names to include in the output.  If ``None``, all columns are
+        returned.  Names must match the header strings exactly.
+
+    Returns
+    -------
+    columns : list of str
+        Ordered list of column names that were selected (intersection of the
+        file's header and *interesting*).
+    rows : list of tuple
+        One tuple per data row.  Each element is either a ``float`` (scalar
+        column) or a ``tuple`` of floats (vector column), in the same order as
+        *columns*.
     """
     with open(filename) as f:
         previous_lines = ['', '']
@@ -53,7 +110,7 @@ def parse_report_file(filename: str, interesting: list[str] = None) -> \
 
         columns = []  # header fields
         dimensionality = 0  # dimensionality of vectors
-        A = []
+        rows = []
 
         for line in f:
             if line[0] == '#':
@@ -109,28 +166,33 @@ def parse_report_file(filename: str, interesting: list[str] = None) -> \
                     interesting = columns
 
             # parse data rows as normal
-            res = []
+            row = []
             fields = line.split()
             it = iter(fields)
             for col, d in zip(columns, field_dims):
                 if col in interesting:
                     if d == 1:
-                        res.append(float(next(it)))
+                        row.append(float(next(it)))
                     elif d > 1:
-                        res.append(_take_vec(it, d))
+                        row.append(_take_vec(it, d))
                 else:
-                    for i in range(d):  # skip ahead
+                    for _ in range(d):  # skip ahead
                         next(it)
-            A.append(tuple(res))
-        return ([col for col in columns if col in interesting], A)
+            rows.append(tuple(row))
+        return ([col for col in columns if col in interesting], rows)
 
 
-if __name__ == '__main__':
-
+def main():
+    """Entry point: parse a report file and print the result to stdout."""
     filename = 'report.txt'
     if len(sys.argv) > 1:
         filename = sys.argv[1]
-    res = parse_report_file(filename,
-                            ['+/- Voltage', 'Max K(+)', 'Max K(-)',
-                             'Pos. max K(+)', 'Pos. max K(-)'])
-    print(res)
+    result = parse_report_file(
+        filename,
+        ['+/- Voltage', 'Max K(+)', 'Max K(-)', 'Pos. max K(+)', 'Pos. max K(-)'],
+    )
+    print(result)
+
+
+if __name__ == '__main__':
+    main()

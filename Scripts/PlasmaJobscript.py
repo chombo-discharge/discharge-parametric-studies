@@ -1,29 +1,65 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
+Plasma study jobscript — sets up and submits the per-voltage SLURM array.
+
+This script runs once per parameter combination in the plasma study stage
+(invoked as a SLURM array task via ``GenericArrayJob.sh``).  Its job is to
+bridge the inception-stepper database with a set of full plasma simulations
+at the voltages where the ionisation integral K is meaningful.
+
+Execution flow
+--------------
+1. **Navigate to run directory** — reads ``structure.json`` to find the run
+   prefix, then uses ``setup_jobscript_logging_and_dir`` to change into the
+   correct ``run_<i>/`` subdirectory for this SLURM task ID.
+
+2. **Load database metadata** — reads ``../inception_stepper/structure.json``
+   (to get the parameter key order) and the corresponding ``index.json`` (to
+   map parameter values to run indices).
+
+3. **Resolve K range and polarity** — reads ``plasma_polarity``, ``K_min``,
+   and ``K_max`` from ``parameters.json``; falls back to reading
+   ``DischargeInceptionStepper.limit_max_K`` from the ``.inputs`` file if
+   ``K_max`` is absent.
+
+4. **Build and submit the voltage array** — calls the four helpers in sequence:
+
+   a. :func:`find_database_run` — resolves which ``PDIV_DB/run_<j>/``
+      directory contains results for these parameters.
+   b. :func:`extract_voltage_table` — reads ``report.txt`` from that database
+      run and returns the (voltage, K, position) rows within [K_min, K_max].
+   c. :func:`create_voltage_directories` — creates one ``voltage_<i>/``
+      directory per table row, writes ``index.json``, copies required files,
+      and injects voltage + electron seed position into each run's input files.
+   d. :func:`submit_voltage_array` — submits the resulting array to SLURM and
+      records the job ID.
+
 Author André Kapelrud
 Copyright © 2025 SINTEF Energi AS
 """
 
-import os
-import sys
 import json
-import re
 import logging
-
-from subprocess import Popen, PIPE
-
+import os
+import re
+import sys
 from pathlib import Path
+from subprocess import PIPE, Popen
 
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
 from ExtractElectronPositions import parse_report_file  # noqa: E402
 from discharge_inception.config_util import (  # noqa: E402
-    copy_files, backup_file, backup_dir,
-    read_input_float_field,
-    setup_jobscript_logging_and_dir, load_slurm_config, build_sbatch_resource_args,
-    handle_combination,
-    DEFAULT_OUTPUT_DIR_PREFIX
+    DEFAULT_OUTPUT_DIR_PREFIX,
+    backup_dir, backup_file,
+    build_sbatch_resource_args, copy_files,
+    handle_combination, load_slurm_config,
+    read_input_float_field, setup_jobscript_logging_and_dir,
 )
+
+MAX_BACKUPS = 10
+VOLTAGE_DIR_PREFIX = "voltage_"
 
 
 def find_database_run(parameters: dict, db_structure: dict, db_index: dict) -> Path:
@@ -32,6 +68,37 @@ def find_database_run(parameters: dict, db_structure: dict, db_index: dict) -> P
     Searches *db_index* for the parameter combination defined by
     *db_structure['space_order']* and returns the path to the matched run
     directory inside the database study.
+
+    Parameters
+    ----------
+    parameters : dict
+        The current run's parameter dict, typically loaded from
+        ``parameters.json``.  Must contain every key listed in
+        ``db_structure['space_order']``.
+    db_structure : dict
+        The parsed ``structure.json`` of the inception database stage.
+        Must contain ``'space_order'`` (ordered list of parameter keys)
+        and ``'identifier'`` (the database directory name relative to
+        the parent of the current working directory).
+    db_index : dict
+        The parsed ``index.json`` of the inception database stage.
+        Expected keys: ``'index'`` (mapping str(i) → parameter list)
+        and optionally ``'prefix'`` (run directory name prefix,
+        defaults to ``DEFAULT_OUTPUT_DIR_PREFIX``).
+
+    Returns
+    -------
+    Path
+        Relative path ``../identifier/prefix<i>`` pointing to the
+        matching database run directory.
+
+    Raises
+    ------
+    ValueError
+        If ``db_structure`` does not contain ``'space_order'``.
+    RuntimeError
+        If no entry in *db_index* matches the required parameter
+        combination.
     """
     log = logging.getLogger(sys.argv[0])
 
@@ -48,10 +115,13 @@ def find_database_run(parameters: dict, db_structure: dict, db_index: dict) -> P
                      for db_i, params in db_index['index'].items()}
     index = reverse_index.get(json.dumps(db_search_index), -1)
     if index < 0:
-        raise RuntimeError(f'Unable to find db parameter_set: {db_param_order} = '
-                           f'{db_search_index}')
-    log.info(f"Found database parameters {db_param_order} = {db_search_index} "
-             f"at index: {index}")
+        raise RuntimeError(
+            f'Unable to find db parameter_set: {db_param_order} = {db_search_index}'
+        )
+    log.info(
+        f"Found database parameters {db_param_order} = {db_search_index} "
+        f"at index: {index}"
+    )
 
     db_run_path = db_path
     if 'prefix' in db_index:
@@ -65,9 +135,36 @@ def extract_voltage_table(report_path: Path, polarity: int,
                           K_min: float, K_max: float) -> list:
     """Read *report_path* and return a voltage table filtered to [K_min, K_max].
 
-    *polarity*: 1 = positive only, -1 = negative only, 0 = both.
+    Parses the data table in the inception stepper ``report.txt`` via
+    ``parse_report_file``, then trims each polarity's rows to the voltage
+    range where K lies within [K_min, K_max], rounding the upper bound up
+    to the nearest available row above K_max.  Both polarity tables are
+    merged and sorted by ascending voltage before returning.
 
-    Returns a list of ``(voltage, K, position)`` tuples sorted by voltage.
+    Parameters
+    ----------
+    report_path : Path
+        Path to the ``report.txt`` produced by the inception stepper for
+        the matching database run.
+    polarity : int
+        Which voltage polarities to include.  Use ``1`` for positive only,
+        ``-1`` for negative only, or ``0`` for both.
+    K_min : float
+        Lower bound on the ionisation integral K.  Rows with K below this
+        value are excluded (the last row at or below K_min is kept as the
+        lower boundary).
+    K_max : float
+        Upper bound on the ionisation integral K.  Rows with K above this
+        value are excluded, except that the first row above K_max is
+        included to bracket the range from above.
+
+    Returns
+    -------
+    list of tuple
+        Each entry is ``(voltage, K, position)`` where *voltage* is the
+        applied voltage (V), *K* is the ionisation integral value, and
+        *position* is the spatial coordinate tuple of the maximum-K point.
+        The list is sorted by ascending voltage.
     """
     report_data = parse_report_file(report_path,
                                     ['+/- Voltage',
@@ -106,14 +203,50 @@ def create_voltage_directories(table: list, structure: dict,
     Writes ``index.json`` for the voltage array, creates ``voltage_<i>/``
     directories, symlinks the executable, copies required files, and injects
     the voltage and particle-position parameters into each run's input files.
+
+    For each entry in *table* this function:
+
+    1. Backs up any pre-existing ``voltage_<i>/`` directory (up to
+       ``MAX_BACKUPS`` generations) to avoid silently overwriting prior runs.
+    2. Creates the directory skeleton: ``voltage_<i>/`` and
+       ``voltage_<i>/logs/``.
+    3. Symlinks ``voltage_<i>/main`` → ``../main`` (the shared executable).
+    4. Copies all ``required_files`` from *structure* into the new directory.
+    5. Builds a parameter combination from the voltage value and the
+       electron seed position (Y-coordinate only, with X and Z set to zero),
+       then calls ``handle_combination`` to write those values into the
+       target ``.inputs`` and ``chemistry.json`` files.
+
+    The electron sphere distribution is centred at the seed position with
+    a radius of half the electrode tip radius (``0.5 * geometry_radius``).
+
+    Parameters
+    ----------
+    table : list of tuple
+        Voltage table as returned by :func:`extract_voltage_table`.
+        Each entry is ``(voltage, K, position)``; the Y-component of
+        *position* is used as the electron seed coordinate.
+    structure : dict
+        Parsed ``structure.json`` for the current plasma study stage.
+        Must contain ``'required_files'`` (list of file names to copy
+        into each voltage directory).
+    input_file : str
+        Name of the ``.inputs`` file inside the voltage directory that
+        receives the ``plasma.voltage`` field.
+    parameters : dict
+        The current run's parameter dict (from ``parameters.json``).
+        Must contain ``'geometry_radius'`` (tip radius in metres), which
+        determines the electron seed sphere radius.
+
+    Raises
+    ------
+    RuntimeError
+        If ``'geometry_radius'`` is absent from *parameters*.
     """
     log = logging.getLogger(sys.argv[0])
 
     if 'geometry_radius' not in parameters:
         raise RuntimeError("'geometry_radius' is missing from 'parameters.json'")
-
-    output_prefix = "voltage_"
-    MAX_BACKUPS = 10
 
     enum_table = list(enumerate(table))
 
@@ -125,7 +258,7 @@ def create_voltage_directories(table: list, structure: dict,
     with open(index_path, 'w') as voltage_index_file:
         json.dump(dict(
             key=["voltage", "K", "particle_position"],
-            prefix=output_prefix,
+            prefix=VOLTAGE_DIR_PREFIX,
             index={i: item for i, item in enum_table}
         ), voltage_index_file, indent=4)
 
@@ -137,7 +270,7 @@ def create_voltage_directories(table: list, structure: dict,
     required_files = [Path(f).name for f in structure['required_files']]
 
     for i, row in enum_table:
-        voltage_dir = Path(f'{output_prefix}{i:d}')
+        voltage_dir = Path(f'{VOLTAGE_DIR_PREFIX}{i:d}')
 
         # don't delete old invocations
         backup_dir(voltage_dir, max_backups=MAX_BACKUPS)
@@ -195,13 +328,42 @@ def create_voltage_directories(table: list, structure: dict,
 
 
 def submit_voltage_array(num_voltages: int, identifier: str, slurm: dict) -> int:
-    """Submit a SLURM voltage array job and return the job ID (-1 on failure)."""
-    log = logging.getLogger(sys.argv[0])
-    MAX_BACKUPS = 10
+    """Submit a SLURM voltage array job and return the job ID.
 
-    sbatch_args = ([f'--array=0-{num_voltages - 1}',
-                    f'--job-name="{identifier}_voltage"']
-                   + build_sbatch_resource_args(slurm, stage='plasma'))
+    Calls ``sbatch`` with ``--array=0-<num_voltages-1>`` and resource
+    arguments derived from the ``plasma`` stage of *slurm*.  Parses the
+    "Submitted batch job <id>" line from sbatch's stdout to capture the
+    job ID, then writes it to ``logs/array_job_id`` (backing up any
+    previous file first).
+
+    Parameters
+    ----------
+    num_voltages : int
+        Total number of voltage directories created by
+        :func:`create_voltage_directories`.  Determines the SLURM array
+        size: tasks are indexed ``0`` through ``num_voltages - 1``.
+    identifier : str
+        Human-readable name for the study (from ``structure['identifier']``).
+        Used to label the SLURM job as ``<identifier>_voltage``.
+    slurm : dict
+        SLURM resource configuration as returned by ``load_slurm_config``.
+        The ``'plasma'`` sub-dict is passed to ``build_sbatch_resource_args``
+        to produce flags such as ``--nodes``, ``--ntasks``, etc.
+
+    Returns
+    -------
+    int
+        The SLURM job ID of the submitted array job, or ``-1`` if the job
+        ID could not be parsed from sbatch's output (e.g. dry-run or
+        submission failure).
+    """
+    log = logging.getLogger(sys.argv[0])
+
+    sbatch_args = (
+        [f'--array=0-{num_voltages - 1}',
+         f'--job-name="{identifier}_voltage"']
+        + build_sbatch_resource_args(slurm, stage='plasma')
+    )
 
     cmdstr = 'sbatch ' + ' '.join(sbatch_args) + ' GenericArrayJob.sh'
     log.debug(f'cmd string: \'{cmdstr}\'')
@@ -231,7 +393,8 @@ def submit_voltage_array(num_voltages: int, identifier: str, slurm: dict) -> int
     return job_id
 
 
-if __name__ == '__main__':
+def main():
+    """Entry point: run the four-step plasma setup pipeline."""
 
     # --- 1. Read study structure and navigate to this run's directory --------
     with open('structure.json') as f:
@@ -256,7 +419,10 @@ if __name__ == '__main__':
     # --- 3. Resolve K range and polarity from parameters / .inputs -----------
     polarity = 0  # 1, 0, or -1
     if 'plasma_polarity' not in parameters:
-        log.warning("'plasma_polarity' was not found in parameters.json, running for both polarities")
+        log.warning(
+            "'plasma_polarity' was not found in parameters.json, "
+            "running for both polarities"
+        )
     else:
         if parameters['plasma_polarity'] == 'positive':
             polarity = 1
@@ -274,7 +440,10 @@ if __name__ == '__main__':
         log.warning("'K_max' not found in parameters, trying to read from .inputs file")
         K_max = read_input_float_field(input_file, 'DischargeInceptionStepper.limit_max_K')
         if K_max is None:
-            raise RuntimeError(f"'{input_file}' does not contain 'DischargeInceptionStepper.limit_max_K' field")
+            raise RuntimeError(
+                f"'{input_file}' does not contain "
+                "'DischargeInceptionStepper.limit_max_K' field"
+            )
         log.info(f"Using K_max={K_max}")
     else:
         K_max = parameters['K_max']
@@ -286,3 +455,7 @@ if __name__ == '__main__':
 
     slurm = load_slurm_config()
     submit_voltage_array(len(table), structure['identifier'], slurm)
+
+
+if __name__ == '__main__':
+    main()
