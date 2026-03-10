@@ -16,7 +16,7 @@ The following information is extracted for every run:
 * **final_step** — last reported time-step number
 * **final_time** — last reported simulation time
 * **final_dt** — last reported time-step size
-* **inception** — whether a discharge inception event was detected
+* **inception** — whether a discharge inception event was detecte d
 * **convergence_failures** — number of Poisson solver convergence failures
 * **other_abort** — whether any other unexpected abort was found
 * **status** — derived run outcome: ``completed``, ``inception``,

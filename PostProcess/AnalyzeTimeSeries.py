@@ -2,24 +2,39 @@
 # -*- coding: utf-8 -*-
 
 """
-Extract fields from a block-wise ASCII simulation log; optionally smooth columns 3–6
-with Savitzky–Golay; compute derivatives (columns 9–10) from Q columns; optionally
-low-pass filter the derivatives; write an aligned .dat with a commented "Column" header;
-and plot columns 3–10 vs Time (column 1) in a 2x4 grid.
+Analyse time-series data from a block-wise ASCII plasma simulation log (``pout.0``).
 
-Fields extracted per block:
+The script reads every ``Driver::Time step report`` block from the log, extracts
+eight physical fields, optionally smooths the energy and charge columns with a
+Savitzky–Golay filter, computes ohmic and electrode currents as finite-difference
+derivatives of the corresponding charge columns, optionally low-pass filters those
+derivatives with a bidirectional exponential moving average, writes the results to
+an aligned 10-column ``.dat`` file with a commented column header, and displays a
+2 × 4 Matplotlib figure of all derived quantities vs time.
+
+Usage::
+
+    python AnalyzeTimeSeries.py [options]
+
+See ``--help`` for the full option list.
+
+Output columns
+--------------
   1. Time
   2. dt
-  3. Delta E(max)
-  4. Delta E(rel)
-  5. Q (ohmic)
-  6. Q (electrode)
+  3. Delta E(max)          (Savitzky–Golay smoothed if ``--sg``)
+  4. Delta E(rel)          (Savitzky–Golay smoothed if ``--sg``)
+  5. Q (ohmic)             (Savitzky–Golay smoothed if ``--sg``)
+  6. Q (electrode)         (Savitzky–Golay smoothed if ``--sg``)
   7. Sum (phi_optical)
   8. Sum (src_optical)
+  9. I (ohmic)             dQ_ohmic/dt  (low-pass filtered if ``--lp``)
+ 10. I (electrode)         dQ_electrode/dt  (low-pass filtered if ``--lp``)
 
-Derived:
-  9.  I (ohmic)
- 10.  I (electrode)
+Authors:
+    André Kapelrud, Robert Marskar
+
+Copyright © 2026 SINTEF Energi AS
 """
 
 import argparse
@@ -27,12 +42,14 @@ import math
 import os
 import re
 import sys
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
 # ---- Optional SciPy import (only needed if --sg is used) ----
 def _import_savgol():
+    """Import and return ``scipy.signal.savgol_filter``, exiting with an error if unavailable."""
     try:
         from scipy.signal import savgol_filter
         return savgol_filter
@@ -88,6 +105,26 @@ COMMENT_HEADER = [
 
 # ---------- Parsing ----------
 def parse_file(in_path: str) -> List[Dict[str, float]]:
+    """
+    Parse a block-wise ASCII simulation log and return one record per time step.
+
+    Each block starts with a ``Driver::Time step report`` sentinel line.  Within
+    a block the function matches every line against the compiled ``PATTERNS`` dict
+    and records the named floating-point values.  Incomplete blocks (e.g. the last
+    block in a still-running simulation) are included as long as they contain at
+    least one recognised field.
+
+    Parameters
+    ----------
+    in_path : str
+        Path to the input ASCII log file (typically ``pout.0``).
+
+    Returns
+    -------
+    list of dict
+        One dict per block; keys are a subset of ``PATTERNS`` keys, values are
+        floats.  Missing fields are simply absent from the dict.
+    """
     rows: List[Dict[str, float]] = []
     current: Dict[str, float] = {}
 
@@ -118,9 +155,28 @@ def parse_file(in_path: str) -> List[Dict[str, float]]:
 
 # ---------- Utility: Savitzky–Golay smoothing with NaN handling ----------
 def _odd_leq(n: int) -> int:
+    """Return *n* if it is odd, otherwise return the next smaller odd integer (≥ 1)."""
     return n if n % 2 == 1 else max(1, n - 1)
 
 def _choose_window(n: int, req_window: int, polyorder: int) -> Optional[int]:
+    """
+    Choose a valid Savitzky–Golay window length given the series length and polynomial order.
+
+    Parameters
+    ----------
+    n : int
+        Number of data points.
+    req_window : int
+        Requested window length (will be capped and made odd as needed).
+    polyorder : int
+        Polynomial order; window must be strictly greater than this value.
+
+    Returns
+    -------
+    int or None
+        A valid odd window length, or ``None`` if no valid window exists for the
+        given *n* and *polyorder*.
+    """
     if n <= polyorder:
         return None
     W = min(req_window, n)
@@ -134,6 +190,28 @@ def _choose_window(n: int, req_window: int, polyorder: int) -> Optional[int]:
 def savgol_smooth_with_nans(x: List[Optional[float]],
                             window_length: int,
                             polyorder: int) -> List[Optional[float]]:
+    """
+    Apply a Savitzky–Golay filter to *x*, tolerating ``None`` and ``NaN`` values.
+
+    Non-finite positions are linearly interpolated before filtering and then
+    restored to ``NaN`` in the output so that gaps are preserved.  If the series
+    is too short or contains too few finite values to support the requested
+    filter, the raw (unsmoothed) finite values are returned unchanged.
+
+    Parameters
+    ----------
+    x : list of float or None
+        Input signal, may contain ``None`` or ``NaN`` entries.
+    window_length : int
+        Desired Savitzky–Golay window (will be adjusted to be odd and ≤ ``len(x)``).
+    polyorder : int
+        Polynomial order for the Savitzky–Golay fit.
+
+    Returns
+    -------
+    list of float or None
+        Smoothed signal of the same length as *x*; ``NaN`` where input was non-finite.
+    """
     arr = np.asarray(x, dtype=float)
     n = arr.size
     if n == 0:
@@ -161,11 +239,16 @@ def savgol_smooth_with_nans(x: List[Optional[float]],
 
 # ---------- Derivative (finite differences) ----------
 def _safe_sub(a: Optional[float], b: Optional[float]) -> Optional[float]:
+    """Return ``a - b``, or ``None`` if either operand is ``None``."""
     if a is None or b is None:
         return None
     return a - b
 
 def _safe_div(num: Optional[float], denom: Optional[float]) -> Optional[float]:
+    """
+    Return ``num / denom``, or ``None`` if either operand is ``None``, non-finite,
+    or if *denom* is zero.
+    """
     if num is None or denom is None:
         return None
     if not (math.isfinite(num) and math.isfinite(denom) and denom != 0.0):
@@ -175,6 +258,31 @@ def _safe_div(num: Optional[float], denom: Optional[float]) -> Optional[float]:
 def compute_derivative(values: List[Optional[float]],
                        times: List[Optional[float]],
                        dts: List[Optional[float]]) -> List[float]:
+    """
+    Compute the time derivative of *values* using finite differences.
+
+    Central differences are used for interior points; one-sided (forward/backward)
+    differences are used at the boundaries.  If the time difference between
+    adjacent points cannot be determined from *times*, the corresponding entry in
+    *dts* is used as a fallback.  Non-finite or missing values produce ``NaN`` in
+    the output.
+
+    Parameters
+    ----------
+    values : list of float or None
+        The signal to differentiate (e.g. Q (ohmic)).
+    times : list of float or None
+        Simulation time at each sample.
+    dts : list of float or None
+        Reported time-step size at each sample (fallback when ``times`` differ by
+        zero or are unavailable).
+
+    Returns
+    -------
+    list of float
+        Derivative ``dvalue/dt`` at each sample; ``NaN`` where the derivative
+        cannot be computed.
+    """
     n = len(values)
     out = [float('nan')] * n
     if n == 0:
@@ -225,6 +333,22 @@ def compute_derivative(values: List[Optional[float]],
 
 # ---------- Low-pass filter: bidirectional exponential (handles nonuniform Δt) ----------
 def _segments_finite(x: np.ndarray, t: np.ndarray) -> List[Tuple[int, int]]:
+    """
+    Return the index ranges of contiguous finite segments in *x* and *t*.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Signal array.
+    t : np.ndarray
+        Time array of the same length.
+
+    Returns
+    -------
+    list of (int, int)
+        Each tuple ``(start, end)`` is the inclusive index range of a contiguous
+        segment where both ``x`` and ``t`` are finite.
+    """
     finite = np.isfinite(x) & np.isfinite(t)
     if not finite.any():
         return []
@@ -246,6 +370,30 @@ def _segments_finite(x: np.ndarray, t: np.ndarray) -> List[Tuple[int, int]]:
 def lowpass_ema_bidirectional(values: List[Optional[float]],
                               times: List[Optional[float]],
                               tau: float) -> List[float]:
+    """
+    Apply a bidirectional exponential moving average (EMA) low-pass filter.
+
+    A forward EMA pass followed by a backward EMA pass are averaged to give
+    zero-phase filtering.  The per-step smoothing coefficient is computed as
+    ``alpha = 1 - exp(-dt/tau)`` so that the filter adapts correctly to
+    non-uniform time steps.  Each contiguous finite segment is filtered
+    independently; ``NaN`` gaps between segments are preserved.
+
+    Parameters
+    ----------
+    values : list of float or None
+        Input signal (e.g. ``I (ohmic)``).
+    times : list of float or None
+        Simulation time at each sample.
+    tau : float
+        EMA time constant in the same units as *times*.  Must be positive and
+        finite; if not, the input is returned unchanged.
+
+    Returns
+    -------
+    list of float
+        Filtered signal of the same length as *values*.
+    """
     if tau is None or not math.isfinite(tau) or tau <= 0.0:
         return [float(v) if (isinstance(v, (int, float)) and math.isfinite(v)) else float('nan') for v in values]
 
@@ -289,6 +437,43 @@ def write_dat_aligned_with_comments(out_path: str,
                                     use_lp: bool,
                                     lp_tau: Optional[float],
                                     col_gap: int = 2):
+    """
+    Apply all post-processing steps and write the 10-column ``.dat`` output file.
+
+    Processing order:
+
+    1. Extract the eight raw columns from *rows*.
+    2. Optionally smooth columns 3–6 (Delta E and Q) with Savitzky–Golay.
+    3. Compute currents I (ohmic) and I (electrode) as ``dQ/dt``.
+    4. Optionally low-pass filter the current columns with a bidirectional EMA.
+    5. Format all values in scientific notation and write an aligned file with
+       the ``COMMENT_HEADER`` prepended.
+
+    Parameters
+    ----------
+    out_path : str
+        Destination ``.dat`` file path.
+    rows : list of dict
+        Parsed time-step records as returned by :func:`parse_file`.
+    use_sg : bool
+        Apply Savitzky–Golay smoothing to columns 3–6.
+    sg_window : int
+        Savitzky–Golay window length (adjusted internally to be odd and valid).
+    sg_order : int
+        Savitzky–Golay polynomial order.
+    use_lp : bool
+        Apply bidirectional EMA low-pass filter to the derivative columns.
+    lp_tau : float or None
+        EMA time constant (seconds).  Required when *use_lp* is ``True``.
+    col_gap : int
+        Number of spaces between adjacent columns (default: 2).
+
+    Returns
+    -------
+    dict
+        Mapping of column name → ``np.ndarray`` for all columns, suitable for
+        passing directly to :func:`plot_2x4`.
+    """
     # Collect raw arrays
     T   = [rec.get("Time") for rec in rows]
     dT  = [rec.get("dt") for rec in rows]
@@ -372,8 +557,22 @@ def write_dat_aligned_with_comments(out_path: str,
 # ---------- Plotting ----------
 def plot_2x4(time: np.ndarray, series: Dict[str, np.ndarray]) -> None:
     """
-    Plot columns 3–10 vs Time in a 2x4 grid with same line style (no markers).
-    Y labels include units. Columns 7–8 use log-scale on Y.
+    Display a 2 × 4 Matplotlib figure of all derived quantities vs simulation time.
+
+    Each subplot corresponds to one output column (columns 3–10).  All panels
+    share the x-axis.  The two optical-sum columns (7 and 8) use a logarithmic
+    y-axis; all others use a linear scale.  If ``matplotlib`` is not available a
+    warning is printed and the function returns without error.
+
+    Parameters
+    ----------
+    time : np.ndarray
+        1-D array of simulation times (column 1 of the output).
+    series : dict
+        Mapping of column name → ``np.ndarray``.  Must contain keys
+        ``"Delta E(max)"``, ``"Delta E(rel)"``, ``"Q (ohmic)"``,
+        ``"Q (electrode)"``, ``"Sum (phi_optical)"``, ``"Sum (src_optical)"``,
+        ``"I (ohmic)"``, and ``"I (electrode)"``.
     """
     try:
         import matplotlib.pyplot as plt
@@ -434,6 +633,7 @@ def plot_2x4(time: np.ndarray, series: Dict[str, np.ndarray]) -> None:
 
 # ---------- Main ----------
 def main():
+    """Parse command-line arguments and run the full extract → smooth → differentiate → write → plot pipeline."""
     ap = argparse.ArgumentParser(
         description="Extract, (optionally) smooth, differentiate, and (optionally) low-pass filter; write aligned .dat with commented header; then plot."
     )
@@ -457,7 +657,7 @@ def main():
         print(f"Error: input file not found: {in_path}", file=sys.stderr)
         sys.exit(1)
 
-    out_path = args.output or "pout.out"
+    out_path = args.output or str(Path(in_path).with_suffix(".out"))
 
     rows = parse_file(in_path)
     if not rows:

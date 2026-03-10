@@ -23,7 +23,8 @@ This step is automatic run by submitting jobs via a SLURM queue system, so the u
    <style>
    section#installation,
    section#architecture,
-   section#writing-jobscripts,
+   section#jobscripts-guide,
+   section#post-processing,   
    section#example-rod-case {
        display:none;
    }
@@ -90,9 +91,9 @@ Post-processing
 
    PostProcess/ExtractInceptionVoltages
    PostProcess/GatherPlasmaEventLogs
-   PostProcess/Analyze
+   PostProcess/AnalyzeTimeSeries
    PostProcess/PlotDeltaERel
-   PostProcess/Summarize
+
 
 Example — Rod Case
 ******************
