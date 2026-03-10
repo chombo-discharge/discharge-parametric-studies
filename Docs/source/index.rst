@@ -44,10 +44,7 @@ Installation
 
    Installation/Prerequisites
    Installation/GetSource
-   Installation/Venv
-   Installation/Install
-   Installation/Verify
-   Installation/EnvVars
+   Installation/InstallationInstructions
 
 Architecture
 ************
@@ -70,21 +67,18 @@ Architecture
    Architecture/CallChain
    Architecture/ScriptRoles
 
-Writing Jobscripts
-******************
+Jobscripts guide
+*****************
 
 .. toctree::
    :maxdepth: 2
-   :caption: Writing Jobscripts
+   :caption: Jobscripts guide
    :hidden:
 
    Jobscripts/WhereFit
    Jobscripts/GenericArrayJob
-   Jobscripts/SetupHelper
-   Jobscripts/Simple
-   Jobscripts/Database
-   Jobscripts/Study
-   Jobscripts/HandleCombination
+   Jobscripts/DischargeInceptionScript
+   Jobscripts/PlasmaScript
 
 Example — Rod Case
 ******************

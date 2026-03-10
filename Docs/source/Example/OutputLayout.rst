@@ -9,44 +9,49 @@ Just after submission (before any SLURM job has run), the layout looks like:
 
    $ ls -R --file-type ~/my_rod_study
    .:
-   PDIV_DB/  study0/
+   pdiv_database/  plasma_simulations/
 
-   ./PDIV_DB:
-   array_job_id  DischargeInceptionJobscript.py  GenericArrayJob.sh
-   index.json    master.inputs                   ParseReport.py
+   ./pdiv_database:
+   array_job_id  DischargeInceptionJobscript.py  ExtractElectronPositions.py
+   GenericArrayJob.sh  index.json  master.inputs  chemistry.json
+   electron_transport_data.dat  ion_transport_data.dat  detachment_rate.dat
    main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
-   run_0/  structure.json  chemistry.json  electron_transport_data.dat  detachment_rate.dat
+   run_0/  run_1/  run_2/  structure.json
    jobscript_symlink@
 
-   ./PDIV_DB/run_0:
-   chk/  master.inputs  parameters.json  plt/  pout.*  main@
-   chemistry.json  electron_transport_data.dat  detachment_rate.dat
+   ./pdiv_database/run_0:
+   master.inputs  parameters.json  chemistry.json
+   electron_transport_data.dat  ion_transport_data.dat  detachment_rate.dat
+   chk/  plt/  pout.*  main@
 
-   ./study0:
-   array_job_id  chemistry.json  GenericArrayJob.sh  inception_stepper@
-   index.json    master.inputs   PlasmaJobscript.py
+   ./plasma_simulations:
+   array_job_id  chemistry.json  GenericArrayJob.sh  GenericArrayJobJobscript.py
+   ExtractElectronPositions.py  inception_stepper@  index.json  master.inputs
+   PlasmaJobscript.py
    main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
-   run_0/  structure.json  jobscript_symlink@
+   run_0/  run_1/  run_2/  structure.json  jobscript_symlink@
 
-   ./study0/run_0:
+   ./plasma_simulations/run_0:
    chemistry.json  detachment_rate.dat  electron_transport_data.dat
-   master.inputs   parameters.json      main@
+   ion_transport_data.dat  master.inputs  parameters.json  main@
 
 Key points:
 
-* ``jobscript_symlink@`` in ``PDIV_DB/`` points to
-  ``DischargeInceptionJobscript.py``; in ``study0/`` it points to
+* ``jobscript_symlink@`` in ``pdiv_database/`` points to
+  ``DischargeInceptionJobscript.py``; in ``plasma_simulations/`` it points to
   ``PlasmaJobscript.py``.  ``GenericArrayJob.sh`` calls
   ``python ./jobscript_symlink`` without knowing which script it is.
 
-* ``study0/inception_stepper@`` is a symlink to ``../PDIV_DB``, giving the
-  plasma study jobscript direct access to inception results.
+* ``plasma_simulations/inception_stepper@`` is a symlink to
+  ``../pdiv_database``, giving the plasma study jobscript direct access to
+  inception results.  The symlink name matches the database ``identifier``
+  (``'inception_stepper'``).
 
 * ``run_N/main@`` in both stages points to the executable in the parent stage
   directory.  Both stages use the same binary.
 
-* ``master.inputs`` in ``PDIV_DB/run_N/`` has ``app.mode = inception``; in
-  ``study0/run_N/`` it has ``app.mode = plasma``.  The configurator writes
-  this automatically.
+* ``master.inputs`` in ``pdiv_database/run_N/`` has ``app.mode = inception``; in
+  ``plasma_simulations/run_N/`` it has ``app.mode = plasma``.  The configurator
+  writes this automatically via ``input_overrides``.
 
 See :ref:`arch_output_dir` for a full description of every metadata file.

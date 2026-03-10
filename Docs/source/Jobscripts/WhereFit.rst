@@ -3,11 +3,22 @@
 Where jobscripts fit
 ====================
 
-``discharge-inception run`` sets up the directory structure and submits SLURM array
-jobs, but the actual simulation work is done by *jobscripts* — Python scripts
-that run inside each SLURM task.  ``GenericArrayJob.sh`` is the SLURM entry
-point; it activates the environment and then calls
-``python ./jobscript_symlink``, which resolves to the specific jobscript for
-that stage.
+Rather than requiring users to author their own jobscripts, the framework ships two
+ready-made scripts in ``Scripts/``:
 
-See :ref:`arch_call_chain` for a full picture of how the pieces connect.
+``Scripts/DischargeInceptionJobscript.py``
+   Runs the **database stage** (inception stepper).  Each SLURM task processes one
+   parameter combination: it invokes ``DischargeInceptionStepper``, checks the result
+   against ``DischargeInceptionTagger.max_voltage``, and auto-corrects and reruns if
+   the stepper exceeded the tagger limit.  See :ref:`jobscripts_discharge_inception`.
+
+``Scripts/PlasmaJobscript.py``
+   Runs the **plasma stage** (ItoKMC).  It reads the database results, selects
+   voltages from the K-range, creates per-voltage subdirectories, and submits the
+   voltage SLURM array.  See :ref:`jobscripts_plasma`.
+
+Both scripts are invoked through ``GenericArrayJob.sh``, which is the SLURM entry
+point: it activates the environment and calls ``python ./jobscript_symlink``, which
+resolves to the appropriate script for the stage.  See :ref:`jobscripts_generic_array_job`
+for details on the SLURM wrapper itself, and :ref:`arch_call_chain` for a full picture
+of how all the pieces connect.

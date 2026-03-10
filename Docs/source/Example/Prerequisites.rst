@@ -15,7 +15,7 @@ The Rod case demonstrates the **two-level database → study pipeline**:
 
 Before starting, ensure the following are available:
 
-* ``discharge-inception`` is installed — see :doc:`/Installation/Install`.
+* ``discharge-inception`` is installed — see :doc:`/Installation/InstallationInstructions`.
 * ``DISCHARGE_HOME`` is set and points to a compiled
   `chombo-discharge <https://chombo-discharge.github.io/>`_ installation —
   see :ref:`install_prereqs`.

@@ -3,65 +3,85 @@
 Inspecting the parameter space definition
 ==========================================
 
-Open ``Exec/Rod/Studies/PressureStudy/Runs.py`` to inspect or adjust the
-parameter space.  The top-level structure is:
+Open ``Exec/Rod/Studies/RadiusStudy.py`` to inspect or adjust the parameter space.
+The top-level structure is:
 
 .. code-block:: python
 
    top_object = dict(
        databases=[inception_stepper],
-       studies=[plasma_study_1]
+       studies=[plasma_study]
    )
 
 Both entries point to the flat ``Exec/Rod/`` directory:
 
 .. code-block:: python
 
-   rod_dir = '../../'
+   rod_dir = '../'
 
-**Database** (``inception_stepper``) — computes inception voltages over a grid
-of pressures and rod radii.  ``app.mode=inception`` is injected on the command
-line by ``DischargeInceptionJobscript.py`` at runtime, so it is not part of the
-parameter space here.  Pressure is written into ``chemistry.json`` so both
-stages always use the same gas conditions:
+**Database** (``inception_stepper``) — computes inception voltages.  The free
+parameters are determined by the plasma study entries that carry
+``"database": "inception_stepper"`` (see below).  Fixed settings that apply to
+every database run are collected in ``input_overrides``:
 
 .. code-block:: python
 
-   'parameter_space': {
-       "pressure": {
-           "target": "chemistry.json",
-           "uri": ["gas", "law", "ideal_gas", "pressure"]
+   'input_overrides': {
+       'mode': {
+           'target': 'master.inputs',
+           'uri': 'app.mode',
+           'value': "inception"
        },
-       "geometry_radius": {
+       "limit_max_K": {
            "target": "master.inputs",
-           "uri": "Rod.radius",
+           "uri": "DischargeInceptionStepper.limit_max_K",
+           "value": 12
        },
-       'K_max': {
+       "max_steps": {
            "target": "master.inputs",
-           "uri": "DischargeInceptionStepper.limit_max_K"
-       }
+           "uri": "Driver.max_steps",
+           "value": 0
+       },
+       "plot_interval": {
+           "target": "master.inputs",
+           "uri": "Driver.plot_interval",
+           "value": -1
+       },
    }
 
-**Study** (``plasma_study_1``) — runs plasma simulations using the database
-results.  ``app.mode`` is set to ``plasma`` via its own parameter entry so the
-same binary runs the full ItoKMC simulation.  Parameters marked with
-``"database": "inception_stepper"`` declare a SLURM dependency: study jobs will
-not start until all database jobs have completed.  The applied voltage comes
-from the inception results and is set per voltage sub-run:
+**Study** (``plasma_study``) — runs plasma simulations using the database
+results.  ``app.mode`` is set to ``plasma`` via ``input_overrides``.  Parameters
+marked with ``"database": "inception_stepper"`` declare a SLURM dependency: study
+jobs will not start until the corresponding database job has completed, and the
+configurator ensures that each study run is paired with the matching database entry.
+
+Plasma-only parameters (no ``"database"`` key) are swept independently:
 
 .. code-block:: python
 
-   'parameter_space': {
-       "app_mode": {
-           "target": "master.inputs",
-           "uri": "app.mode",
-           "values": ["plasma"]
+   'input_overrides': {
+       'mode': {
+           'target': 'master.inputs',
+           'uri': 'app.mode',
+           'value': "plasma"
        },
+       "max_steps": {
+           "target": "master.inputs",
+           "uri": "Driver.max_steps",
+           "value": 500
+       },
+   },
+   'job_script_options': {
+       'K_min': 6,
+       'K_max': 12.0,
+       'plasma_polarity': 'positive',
+   },
+   'parameter_space': {
        "geometry_radius": {
            "database": "inception_stepper",
            "target": "master.inputs",
            "uri": "Rod.radius",
-           "values": [1e-3]
+           "values": [100E-6, 500E-6, 1e-3]
        },
        "pressure": {
            "database": "inception_stepper",
@@ -69,13 +89,26 @@ from the inception results and is set per voltage sub-run:
            "uri": ["gas", "law", "ideal_gas", "pressure"],
            "values": [1e5]
        },
-       "K_min": {"values": [6]},
-       "K_max": {
-           "database": "inception_stepper",
-           "values": [12.0]
+       "photoionization": {
+           "target": "chemistry.json",
+           "uri": [
+               "photoionization",
+               [
+                   '+["reaction"=<chem_react>"Y + (O2) -> e + O2+"]',
+                   '*["reaction"=<chem_react>"Y + (O2) -> (null)"]'
+               ],
+               "efficiency"
+           ],
+           "values": [[1.0, 0.0]]
        },
-       ...
    }
 
-See :ref:`arch_param_space` and :ref:`arch_db_study` for a full explanation of
-parameter space syntax and database dependencies.
+The ``photoionization`` entry uses the ``<chem_react>`` match expression to
+locate reaction entries in ``chemistry.json`` by their reaction string.  The
+``+`` prefix requires the match to exist; ``*`` creates the entry if absent.
+A Python list at any level of the ``uri`` produces multiple parallel writes —
+here both reactions are written in a single parameter sweep step.
+
+See :ref:`arch_param_space`, :ref:`arch_json_uri`, and :ref:`arch_db_study` for
+a full explanation of parameter space syntax, JSON URI conventions, and database
+dependencies.

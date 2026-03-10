@@ -1,12 +1,9 @@
-Move all script files to Scripts
-ParseReport.py -> ExtractElectronPositions.py
-The plasma job file should be refactored -- it is messy and unreadable.
-    1. Add docstring to all of it.
-    2. Use a user-provided method to provide the starting electron positions. Can this be done via the study files???
-    3. This one has a hard-coded runtime error with geometry_radius. We can't have it like this...
+I want some postprocessing scripts to post-process the outputs of plasma simulations.
+  How should we achieve this? Most of the stuff is present in the pout files. 
            
 
 At the end:
    Documentation should use the new factorization method. Right now, I'm changing so many things that the documentation will simply have to wait.
    We should include at least 1-2 examples that show how to run this thing.
    Default dimension should be 2d, not 3d. 
+

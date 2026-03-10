@@ -7,7 +7,7 @@ Scripts in ``PostProcess/`` summarise and plot the study results:
 
 .. code-block:: bash
 
-   cd ~/my_rod_study/study0
+   cd ~/my_rod_study/plasma_simulations
    bash /path/to/PostProcess/Summarize.sh
 
 Or run the analysis scripts directly:
