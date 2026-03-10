@@ -80,6 +80,7 @@ def setup_env(log, obj, obj_type, output_dir, dim, rel_path):
 
     os.makedirs(out_dir, exist_ok=False)  # yes, crap out if it exists
     os.makedirs(out_dir / 'logs')
+    os.makedirs(out_dir / 'required_files')
     log.info(f"  * directory: {out_dir}")
 
     shutil.copy(rel_path / obj['job_script'], out_dir, follow_symlinks=True)
@@ -92,7 +93,7 @@ def setup_env(log, obj, obj_type, output_dir, dim, rel_path):
     log.info(f"  * program: {program}")
 
     if 'required_files' in obj:
-        copy_files(log, obj['required_files'], out_dir, rel_path)
+        copy_files(log, obj['required_files'], out_dir / 'required_files', rel_path)
     else:
         log.warning(f"no 'required_files' field in '{ident}'")
 
