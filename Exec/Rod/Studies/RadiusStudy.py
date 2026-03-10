@@ -110,6 +110,18 @@ plasma_study = {
         'K_min': 6,
         'K_max': 12.0,
         'plasma_polarity': 'positive',
+        # --- particle seeding (optional) ------------------------------------
+        # 'particle_mode': 'single',   # default: one seed electron at the
+        #                              # critical position from the DB
+        # 'num_particles': 1,          # weight (single) or count (sphere)
+        #
+        # Sphere mode — seed from a volumetric distribution instead:
+        # 'particle_mode': 'sphere',
+        # 'sphere_radius': 50e-6,      # required for sphere mode
+        # 'sphere_center': [0, 0.02, 0],  # optional; defaults to DB position
+        #
+        # Interpolated voltage points (optional; default: all report rows):
+        # 'N_voltages': 10,            # exactly N runs per polarity
     },
     'parameter_space': {
         "geometry_radius": {

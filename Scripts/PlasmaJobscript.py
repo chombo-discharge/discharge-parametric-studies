@@ -47,6 +47,8 @@ import sys
 from pathlib import Path
 from subprocess import PIPE, Popen
 
+import numpy as np
+
 # local imports
 sys.path.append(os.getcwd())  # needed for local imports from slurm scripts
 from ExtractElectronPositions import parse_report_file  # noqa: E402
@@ -131,6 +133,61 @@ def find_database_run(parameters: dict, db_structure: dict, db_index: dict) -> P
     return db_run_path
 
 
+def _clamp_K_range(data: list, K_min: float, K_max: float) -> tuple[float, float]:
+    """Warn and clamp K_min/K_max to the range available in *data*.
+
+    Parameters
+    ----------
+    data : list of (voltage, K, position)
+        Full table for one polarity, sorted by voltage.
+    K_min, K_max : float
+        User-requested ionisation-integral bounds.
+
+    Returns
+    -------
+    tuple of (effective_K_min, effective_K_max)
+        Possibly clamped values; a warning is logged for each bound that
+        was out of range.
+    """
+    log = logging.getLogger(sys.argv[0])
+    K_vals = [row[1] for row in data]
+    actual_min, actual_max = min(K_vals), max(K_vals)
+
+    eff_min, eff_max = K_min, K_max
+    if K_max > actual_max:
+        log.warning(
+            f"K_max={K_max} exceeds the maximum K in the report "
+            f"({actual_max:.4g}); clamping to {actual_max:.4g}"
+        )
+        eff_max = actual_max
+    if K_min < actual_min:
+        log.warning(
+            f"K_min={K_min} is below the minimum K in the report "
+            f"({actual_min:.4g}); clamping to {actual_min:.4g}"
+        )
+        eff_min = actual_min
+    return eff_min, eff_max
+
+
+def _pick_data(data: list, K_min: float, K_max: float) -> list:
+    """Slice *data* to rows where K ∈ [K_min, K_max].
+
+    *data* is a list of (voltage, K, position) triples sorted by voltage
+    (equivalently, by K, since K is monotone in voltage).  The function
+    keeps the last row at or below K_min as the lower boundary, and the
+    first row above K_max as the upper boundary (rounding up).
+    """
+    imin, i_max = 0, 0
+    for i, (_, K, _) in enumerate(data):
+        if K <= K_min:
+            imin = i
+        if K <= K_max:
+            i_max = i
+    if data[i_max][1] != K_max and i_max + 1 < len(data):
+        i_max += 1
+    return data[imin:i_max + 1]
+
+
 def extract_voltage_table(report_path: Path, polarity: int,
                           K_min: float, K_max: float) -> list:
     """Read *report_path* and return a voltage table filtered to [K_min, K_max].
@@ -174,30 +231,135 @@ def extract_voltage_table(report_path: Path, polarity: int,
                                      'Pos. max K(-)'])
     report_data = report_data[1]  # discard column names
 
-    def pick_data(data):
-        imin, iMax = (0, 0)
-        for i, (_, K, _) in enumerate(data):
-            if K <= K_min:
-                imin = i
-            if K <= K_max:
-                iMax = i
-        if data[iMax][1] != K_max and iMax + 1 < len(data):
-            iMax += 1  # round to nearest K higher than K_max
-        return data[imin:iMax + 1]
-
     table = []
     if polarity >= 0:
-        table.extend(pick_data([(v, Kp, pos_p)
-                                for v, Kp, _, pos_p, _ in report_data]))
+        pos_data = [(v, Kp, pos_p) for v, Kp, _, pos_p, _ in report_data]
+        eff_min, eff_max = _clamp_K_range(pos_data, K_min, K_max)
+        table.extend(_pick_data(pos_data, eff_min, eff_max))
     if polarity <= 0:
-        table.extend(pick_data([(v, Km, pos_n)
-                                for v, _, Km, _, pos_n in report_data]))
+        neg_data = [(v, Km, pos_n) for v, _, Km, _, pos_n in report_data]
+        eff_min, eff_max = _clamp_K_range(neg_data, K_min, K_max)
+        table.extend(_pick_data(neg_data, eff_min, eff_max))
 
     return sorted(table, key=lambda t: t[0])
 
 
+def interpolate_table(report_path: Path, polarity: int,
+                      K_min: float, K_max: float, n: int) -> list:
+    """Return *n* interpolated (voltage, K, position) tuples per polarity.
+
+    For polarity=0, interpolates *n* points for positive AND *n* points for
+    negative polarity, returning 2*n* tuples total sorted by voltage.
+
+    Voltage and all position coordinates are linearly interpolated at *n*
+    evenly-spaced K values from K_min to K_max (inclusive).
+
+    Parameters
+    ----------
+    report_path : Path
+        Path to the inception stepper's report.txt.
+    polarity : int
+        1 = positive only, -1 = negative only, 0 = both.
+    K_min, K_max : float
+        Ionisation-integral bounds for interpolation.
+    n : int
+        Number of interpolated voltage points per polarity.
+
+    Returns
+    -------
+    list of tuple
+        Each entry is (voltage, K_interp, position) sorted by ascending
+        voltage.  position is a tuple of floats matching the dimensionality
+        in the report file.
+    """
+    report_data = parse_report_file(report_path,
+                                    ['+/- Voltage', 'Max K(+)', 'Max K(-)',
+                                     'Pos. max K(+)', 'Pos. max K(-)'])[1]
+
+    def _interp_group(data):
+        eff_K_min, eff_K_max = _clamp_K_range(data, K_min, K_max)
+        sliced = _pick_data(data, eff_K_min, eff_K_max)
+        if not sliced:
+            return []
+        K_vals = np.array([row[1] for row in sliced])
+        v_vals = np.array([row[0] for row in sliced])
+        pos_vals = [row[2] for row in sliced]
+        ndim = len(pos_vals[0])
+
+        K_targets = np.linspace(eff_K_min, eff_K_max, n)
+        result = []
+        for K_t in K_targets:
+            v_t = float(np.interp(K_t, K_vals, v_vals))
+            pos_t = tuple(
+                float(np.interp(K_t, K_vals, [p[j] for p in pos_vals]))
+                for j in range(ndim)
+            )
+            result.append((v_t, float(K_t), pos_t))
+        return result
+
+    table = []
+    if polarity >= 0:
+        table.extend(_interp_group([(v, Kp, pos_p)
+                                    for v, Kp, _, pos_p, _ in report_data]))
+    if polarity <= 0:
+        table.extend(_interp_group([(v, Km, pos_n)
+                                    for v, _, Km, _, pos_n in report_data]))
+    return sorted(table, key=lambda t: t[0])
+
+
+def parse_particle_config(parameters: dict) -> dict:
+    """Parse and validate particle-seeding configuration from *parameters*.
+
+    Reads the following keys from *parameters* (all sourced from
+    ``job_script_options`` in the study definition):
+
+    ``particle_mode`` : str, optional
+        ``'single'`` (default) — place W single-particle seed electrons.
+        ``'sphere'`` — seed electrons from a sphere distribution.
+    ``num_particles`` : int, optional
+        For ``'single'`` mode: the ``weight`` field on the single-particle
+        entry (number of physical electrons one computational particle
+        represents).  Default 1.
+        For ``'sphere'`` mode: ``num particles`` in the sphere distribution.
+        Default 1.
+    ``sphere_radius`` : float
+        Sphere radius in metres.  Required when ``particle_mode='sphere'``.
+    ``sphere_center`` : list of float, optional
+        Explicit sphere centre [x, y, z].  When omitted in sphere mode,
+        the interpolated critical position from the database is used.
+
+    Returns
+    -------
+    dict with keys: ``mode``, ``num_particles``, and (sphere only)
+    ``radius`` and optionally ``center``.
+
+    Raises
+    ------
+    RuntimeError
+        If ``particle_mode='sphere'`` but ``sphere_radius`` is absent.
+    ValueError
+        If ``particle_mode`` is not ``'single'`` or ``'sphere'``.
+    """
+    mode = parameters.get('particle_mode', 'single')
+    if mode not in ('single', 'sphere'):
+        raise ValueError(
+            f"'particle_mode' must be 'single' or 'sphere', got {mode!r}"
+        )
+    cfg = {'mode': mode, 'num_particles': int(parameters.get('num_particles', 1))}
+    if mode == 'sphere':
+        if 'sphere_radius' not in parameters:
+            raise RuntimeError(
+                "'sphere_radius' is required in job_script_options "
+                "when particle_mode='sphere'"
+            )
+        cfg['radius'] = parameters['sphere_radius']
+        if 'sphere_center' in parameters:
+            cfg['center'] = parameters['sphere_center']
+    return cfg
+
+
 def create_voltage_directories(table: list, structure: dict,
-                               input_file: str, parameters: dict) -> None:
+                               input_file: str, particle_cfg: dict) -> None:
     """Create per-voltage run directories, copy files, and inject parameters.
 
     Writes ``index.json`` for the voltage array, creates ``voltage_<i>/``
@@ -213,19 +375,17 @@ def create_voltage_directories(table: list, structure: dict,
     3. Symlinks ``voltage_<i>/main`` → ``../main`` (the shared executable).
     4. Copies all ``required_files`` from *structure* into the new directory.
     5. Builds a parameter combination from the voltage value and the
-       electron seed position (Y-coordinate only, with X and Z set to zero),
-       then calls ``handle_combination`` to write those values into the
-       target ``.inputs`` and ``chemistry.json`` files.
+       electron seed position, then calls ``handle_combination`` to write
+       those values into the target ``.inputs`` and ``chemistry.json`` files.
 
-    The electron sphere distribution is centred at the seed position with
-    a radius of half the electrode tip radius (``0.5 * geometry_radius``).
+    The seeding mode (single particle or sphere distribution) is controlled
+    by *particle_cfg* as produced by :func:`parse_particle_config`.
 
     Parameters
     ----------
     table : list of tuple
-        Voltage table as returned by :func:`extract_voltage_table`.
-        Each entry is ``(voltage, K, position)``; the Y-component of
-        *position* is used as the electron seed coordinate.
+        Voltage table as returned by :func:`extract_voltage_table` or
+        :func:`interpolate_table`.  Each entry is ``(voltage, K, position)``.
     structure : dict
         Parsed ``structure.json`` for the current plasma study stage.
         Must contain ``'required_files'`` (list of file names to copy
@@ -233,20 +393,11 @@ def create_voltage_directories(table: list, structure: dict,
     input_file : str
         Name of the ``.inputs`` file inside the voltage directory that
         receives the ``plasma.voltage`` field.
-    parameters : dict
-        The current run's parameter dict (from ``parameters.json``).
-        Must contain ``'geometry_radius'`` (tip radius in metres), which
-        determines the electron seed sphere radius.
-
-    Raises
-    ------
-    RuntimeError
-        If ``'geometry_radius'`` is absent from *parameters*.
+    particle_cfg : dict
+        Particle-seeding configuration as returned by
+        :func:`parse_particle_config`.
     """
     log = logging.getLogger(sys.argv[0])
-
-    if 'geometry_radius' not in parameters:
-        raise RuntimeError("'geometry_radius' is missing from 'parameters.json'")
 
     enum_table = list(enumerate(table))
 
@@ -286,44 +437,58 @@ def create_voltage_directories(table: list, structure: dict,
 
         # reuse the combination writing code from the configurator / ConfigUtil, by
         # building a fake combination and parameter space:
-        particle_pos = [0.0, row[2][1], 0.0]  # strip X and Z coords
-        comb_dict = dict(
-            voltage=row[0],
-            sphere_dist_props=[
-                particle_pos,                          # center position
-                0.5 * parameters['geometry_radius']    # half the tip's radius
-            ],
-            single_particle_position=particle_pos      # center position
-        )
-        distribution_type = 'sphere distribution'
+
+        # Build 3-D position from report-file coordinates (Y only for 2-D runs;
+        # all components for 3-D runs).
+        report_pos = row[2]
+        if len(report_pos) == 2:  # 2-D run: pad X=0, Z=0
+            seed_pos = [0.0, report_pos[1], 0.0]
+        else:
+            seed_pos = list(report_pos)
+
+        mode = particle_cfg['mode']
+        W = particle_cfg['num_particles']
+
+        comb_dict = {'voltage': row[0]}
         pspace = {
-            "voltage": {
-                "target": voltage_dir / input_file,
-                "uri": "plasma.voltage",
+            'voltage': {
+                'target': voltage_dir / input_file,
+                'uri': 'plasma.voltage',
             },
-            "sphere_dist_props": {
-                "target": voltage_dir / 'chemistry.json',
-                'uri': [
-                    'plasma species',
-                    '+["id"="e"]',  # find electrons in list
-                    'initial particles',
-                    f'+["{distribution_type}"]',
-                    distribution_type,  # TODO: fix duplicity here
-                    ['center', 'radius']  # NB! two parameters
-                ]
-            },
-            "single_particle_position": {
-                "target": voltage_dir / 'chemistry.json',
-                'uri': [
-                    'plasma species',
-                    '+["id"="e"]',  # find electrons in list
-                    'initial particles',
-                    f'+["single particle"]',
-                    "single particle",  # TODO: fix duplicity here
-                    'position'  # NB! two parameters
-                ]
-            }
         }
+
+        _EP = ['plasma species', '+["id"="e"]', 'initial particles']
+
+        if mode == 'single':
+            comb_dict['single_position'] = seed_pos
+            comb_dict['single_weight'] = W
+            pspace['single_position'] = {
+                'target': voltage_dir / 'chemistry.json',
+                'uri': _EP + ['+["single particle"]', 'single particle', 'position'],
+            }
+            pspace['single_weight'] = {
+                'target': voltage_dir / 'chemistry.json',
+                'uri': _EP + ['+["single particle"]', 'single particle', 'weight'],
+            }
+        else:  # sphere
+            center = particle_cfg.get('center', seed_pos)
+            comb_dict['sphere_center'] = center
+            comb_dict['sphere_radius'] = particle_cfg['radius']
+            comb_dict['sphere_num_particles'] = W
+            pspace['sphere_center'] = {
+                'target': voltage_dir / 'chemistry.json',
+                'uri': _EP + ['+["sphere distribution"]', 'sphere distribution', 'center'],
+            }
+            pspace['sphere_radius'] = {
+                'target': voltage_dir / 'chemistry.json',
+                'uri': _EP + ['+["sphere distribution"]', 'sphere distribution', 'radius'],
+            }
+            pspace['sphere_num_particles'] = {
+                'target': voltage_dir / 'chemistry.json',
+                'uri': _EP + ['+["sphere distribution"]', 'sphere distribution',
+                               'num particles'],
+            }
+
         handle_combination(pspace, comb_dict)
 
 
@@ -448,10 +613,27 @@ def main():
     else:
         K_max = parameters['K_max']
 
+    # --- 3b. Resolve particle-seeding configuration --------------------------
+    particle_cfg = parse_particle_config(parameters)
+    log.info(f"Particle seeding mode: {particle_cfg}")
+
+    # --- 3c. Resolve N_voltages (optional; None = use all report rows) --------
+    N_voltages = parameters.get('N_voltages', None)
+    if N_voltages is not None:
+        N_voltages = int(N_voltages)
+        log.info(f"Interpolating {N_voltages} voltage points per polarity")
+
     # --- 4. Run the four-step plasma setup pipeline --------------------------
     db_run_path = find_database_run(parameters, db_structure, db_index)
-    table = extract_voltage_table(db_run_path / 'report.txt', polarity, K_min, K_max)
-    create_voltage_directories(table, structure, input_file, parameters)
+    if N_voltages is not None:
+        table = interpolate_table(
+            db_run_path / 'report.txt', polarity, K_min, K_max, N_voltages
+        )
+    else:
+        table = extract_voltage_table(
+            db_run_path / 'report.txt', polarity, K_min, K_max
+        )
+    create_voltage_directories(table, structure, input_file, particle_cfg)
 
     slurm = load_slurm_config()
     submit_voltage_array(len(table), structure['identifier'], slurm)
