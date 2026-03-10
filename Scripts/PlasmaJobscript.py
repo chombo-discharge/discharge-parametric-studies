@@ -142,6 +142,7 @@ def create_voltage_directories(table: list, structure: dict,
         # don't delete old invocations
         backup_dir(voltage_dir, max_backups=MAX_BACKUPS)
         os.makedirs(voltage_dir, exist_ok=False)
+        os.makedirs(voltage_dir / 'logs')
 
         # further symlink program executable
         link_path = voltage_dir / 'main'
@@ -216,7 +217,7 @@ def submit_voltage_array(num_voltages: int, identifier: str, slurm: dict) -> int
                 job_id_str = m.groupdict()['job_id']
                 job_id = int(job_id_str)
 
-                array_job_id_path = Path('array_job_id')
+                array_job_id_path = Path('logs') / 'array_job_id'
                 backup_file(array_job_id_path, max_backups=MAX_BACKUPS)
 
                 with open(array_job_id_path, 'w') as job_id_file:

@@ -79,6 +79,7 @@ def setup_env(log, obj, obj_type, output_dir, dim, rel_path):
     log.info(f"Setting up {obj_type} simulation: '{ident}'")
 
     os.makedirs(out_dir, exist_ok=False)  # yes, crap out if it exists
+    os.makedirs(out_dir / 'logs')
     log.info(f"  * directory: {out_dir}")
 
     shutil.copy(rel_path / obj['job_script'], out_dir, follow_symlinks=True)
@@ -477,7 +478,7 @@ def schedule_slurm_jobs(log, structure, out_dir, rel_path, sorted_combinations,
             m = re.match('^Submitted batch job (?P<job_id>[0-9]+)', line)
             if m:
                 job_id = m.groupdict()['job_id']
-                with open(out_dir / 'array_job_id', 'x') as job_id_file:
+                with open(out_dir / 'logs' / 'array_job_id', 'x') as job_id_file:
                     job_id_file.write(job_id)
                 log.info(f"Submitted array job (for '{structure['identifier']}' "
                          f"combination set). [slurm job id = {job_id}]")

@@ -8,8 +8,8 @@
 #   - The Python job scripts read slurm.toml and pass these automatically
 #     when they invoke sbatch themselves (e.g. for the voltage sub-array).
 
-#SBATCH --output=R-%x.%A-%a.out
-#SBATCH --error=R-%x.%A-%a.err
+#SBATCH --output=logs/R-%x.%A-%a.out
+#SBATCH --error=logs/R-%x.%A-%a.err
 
 set -o errexit
 set -o nounset
@@ -36,5 +36,5 @@ if [ -n "${DISCHARGE_INCEPTION_VENV:-}" ]; then
     source "$DISCHARGE_INCEPTION_VENV/bin/activate"
 fi
 
-python ./jobscript_symlink
+PYTHONDONTWRITEBYTECODE=1 python ./jobscript_symlink
 exit $?
