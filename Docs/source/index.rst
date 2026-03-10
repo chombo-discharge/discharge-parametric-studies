@@ -45,6 +45,8 @@ Installation
    Installation/Prerequisites
    Installation/GetSource
    Installation/InstallationInstructions
+   Installation/SlurmConfig
+   Installation/CLI   
 
 Architecture
 ************
@@ -62,8 +64,6 @@ Architecture
    Architecture/JsonUri
    Architecture/DummyParams
    Architecture/OutputDir
-   Architecture/SlurmConfig
-   Architecture/CLI
    Architecture/CallChain
    Architecture/ScriptRoles
 
@@ -79,6 +79,20 @@ Jobscripts guide
    Jobscripts/GenericArrayJob
    Jobscripts/DischargeInceptionScript
    Jobscripts/PlasmaScript
+
+Post-processing
+***************
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Post-processing
+   :hidden:
+
+   PostProcess/ExtractInceptionVoltages
+   PostProcess/Gather
+   PostProcess/Analyze
+   PostProcess/PlotDeltaERel
+   PostProcess/Summarize
 
 Example — Rod Case
 ******************
@@ -96,4 +110,3 @@ Example — Rod Case
    Example/OutputLayout
    Example/Monitor
    Example/Inspect
-   Example/Postprocess
