@@ -23,6 +23,8 @@ Run the following to see every available subcommand:
      command
        run                   Configure and submit a parametric study.
        ls                    List runs and parameter settings in a study directory.
+       status                Query SLURM and print a live status table for every run
+                             in one or more study directories.
        analyze-time-series   Extract, smooth, differentiate, and filter time-series
                              data from a plasma log.
        extract-inception-voltages
@@ -85,6 +87,69 @@ Example output::
      ---  --------  ---------------  -----
      run_0  100000  0.001            12  [done]
      run_1  200000  0.001            12
+
+``discharge-inception status``
+-------------------------------
+
+Queries SLURM (via ``sacct``/``squeue``) and prints a live status table for
+every run in one or more study directories.
+
+.. code-block:: text
+
+   usage: discharge-inception status [-h] [--no-voltage] study_dir [study_dir ...]
+
+   positional arguments:
+     study_dir      Study directory (containing index.json) or parent directory
+                    containing multiple studies.
+
+   options:
+     -h, --help     show this help message and exit
+     --no-voltage   Skip inner voltage array queries (faster).
+
+Accepts a **study directory** (one that contains ``index.json``) or a **parent
+output directory** whose sub-directories are studies — in the latter case all
+studies are reported in one pass.
+
+For inception-stepper databases the table shows the outer array-job state and,
+for failed tasks, the exit code:
+
+.. code-block:: console
+
+   $ discharge-inception status study_results/pdiv_database/
+
+.. code-block:: text
+
+   study_results/pdiv_database/  (4 runs, job 98765)
+     run     state
+     ------  ---------
+     run_0   completed
+     run_1   completed
+     run_2   running
+     run_3   pending
+     Summary: 2 completed, 1 running, 1 pending
+
+For plasma studies the table also shows a compact summary of each run's inner
+voltage array:
+
+.. code-block:: console
+
+   $ discharge-inception status study_results/plasma_simulations/
+
+.. code-block:: text
+
+   study_results/plasma_simulations/  (2 runs, job 98766)
+     run     state      voltages
+     ------  ---------  --------
+     run_0   completed  7/7 done
+     run_1   running    running (3/7 done)
+     Summary: 1 completed, 1 running
+
+Pass ``--no-voltage`` to skip the inner voltage queries when the study has many
+runs and a fast summary is sufficient.  Multiple directories can be combined in
+a single call::
+
+   discharge-inception status study_results/pdiv_database/ study_results/plasma_simulations/
+   discharge-inception status study_results/   # auto-discovers all sub-studies
 
 ``discharge-inception analyze-time-series``
 -------------------------------------------

@@ -73,10 +73,11 @@ def load_metadata(db_dir: Path) -> Tuple[list, dict, list]:
     with open(index_path) as f:
         idx = json.load(f)
 
-    keys = idx.get("keys", [])
+    keys = idx.get("keys") or idx.get("key") or []
+    prefix = idx.get("prefix", "run_")
     run_index = idx["index"]
     sorted_ids = sorted(run_index.keys(), key=int)
-    return keys, run_index, sorted_ids
+    return keys, prefix, run_index, sorted_ids
 
 
 # ---- Per-run log parsing ----
@@ -210,7 +211,7 @@ def make_parser(add_help=True) -> argparse.ArgumentParser:
     )
     ap.add_argument(
         "--prefix", default="pout", metavar="PREFIX",
-        help="Prefix for log filenames (default: 'pout', giving pout0.0, pout1.0, …).",
+        help="Prefix for log filenames (default: 'pout', giving pout.0).",
     )
     ap.add_argument(
         "--output-dir", default=None, metavar="DIR",
@@ -229,14 +230,14 @@ def run(args) -> None:
     output_dir = Path(args.output_dir) if args.output_dir else db_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    keys, run_index, sorted_ids = load_metadata(db_dir)
+    keys, dir_prefix, run_index, sorted_ids = load_metadata(db_dir)
 
     print(f"# Database : {db_dir}")
     print(f"# Runs     : {len(sorted_ids)}")
 
     for run_str in sorted_ids:
         run_id = int(run_str)
-        pout_path = db_dir / f"{args.prefix}{run_id}.0"
+        pout_path = db_dir / f"{dir_prefix}{run_id}" / f"{args.prefix}.0"
         param_values = run_index[run_str]
 
         print(f"Run {run_id}: {pout_path}")

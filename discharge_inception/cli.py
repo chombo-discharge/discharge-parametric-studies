@@ -117,6 +117,15 @@ def cmd_ls(args) -> None:
 
 
 # ---------------------------------------------------------------------------
+# discharge-inception status
+# ---------------------------------------------------------------------------
+
+def cmd_status(args) -> None:
+    from discharge_inception.slurm_status import cmd_status as _cmd
+    _cmd(args)
+
+
+# ---------------------------------------------------------------------------
 # discharge-inception run
 # ---------------------------------------------------------------------------
 
@@ -182,6 +191,17 @@ def main() -> None:
         'study_dirs', nargs='+', type=Path, metavar='study_dir',
         help='Study output directory containing index.json (e.g. pdiv_database/).')
 
+    # --- discharge-inception status -------------------------------------------------
+    status_p = subparsers.add_parser(
+        'status', help='Show Slurm job status for one or more study directories.')
+    status_p.add_argument(
+        'study_dirs', nargs='+', type=Path, metavar='study_dir',
+        help='Study directory (containing index.json) or parent directory '
+             'containing multiple studies.')
+    status_p.add_argument(
+        '--no-voltage', action='store_true',
+        help='Skip inner voltage array queries (faster).')
+
     # --- discharge-inception analyze-time-series ------------------------------------
     pp_mod = _import_pp('AnalyzeTimeSeries')
     subparsers.add_parser(
@@ -216,6 +236,8 @@ def main() -> None:
         cmd_run(args)
     elif args.command == 'ls':
         cmd_ls(args)
+    elif args.command == 'status':
+        cmd_status(args)
     elif args.command == 'analyze-time-series':
         cmd_analyze_time_series(args)
     elif args.command == 'extract-inception-voltages':
