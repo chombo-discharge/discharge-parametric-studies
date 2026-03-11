@@ -1,34 +1,39 @@
 # discharge-inception
-A collection of batch and slurm scripts for running multilevel chombo-discharge studies over wide parameter spaces
 
-## Usage
-The `Configurator.py` script can be used to set up directory structures for wide parametric sweeps over chombo-discharge based studies.
+CLI and jobscript framework for parametric [chombo-discharge](https://github.com/chombo-discharge/chombo-discharge) studies on SLURM HPC clusters.
 
-```bash
-$ python Configurator.py --help
+## What is discharge-inception?
 
-usage: Configurator.py [-h] [--verbose] [--logfile LOGFILE] [--output-dir OUTPUT_DIR]
-                       [--dim DIM]
-                       run_definition
+discharge-inception manages large parametric sweeps of chombo-discharge simulations on SLURM HPC clusters.
+It wraps two solver types from chombo-discharge:
 
-Batch script for running user-defined, parametrised chombo-discharge studies.
+- **DischargeInceptionStepper** — a lightweight PDIV (partial discharge inception voltage) database phase that sweeps inception voltages across a parameter space.
+- **ItoKMC** — a heavier plasma solver that runs the full simulation study phase.
 
-positional arguments:
-  run_definition        parameter space input file. Json read directly, or if .py file look
-                        for 'top_object' dictionary
+The CLI injects sweep parameters into per-run directories and submits SLURM array jobs.
+The two phases are chained automatically: the database phase runs first, and its results feed the plasma study phase via `--dependency=afterok`.
+Post-processing commands (`discharge-inception extract-inception-voltages`, etc.) consume the outputs of both phases.
 
-options:
-  -h, --help            show this help message and exit
-  --verbose             increase verbosity
-  --logfile LOGFILE     log file. (Postfix) Rotated automatically each invocation.
-  --output-dir OUTPUT_DIR
-                        output directory for study result files
-  --dim DIM             Dimensionality of simulations. Must match chombo-discharge
-                        compilation.
+## Documentation
 
-```
+Documentation is built and published by the GitHub Actions workflow on every push to `main`:
 
-# Compilation
+- **HTML docs** (GitHub Pages): https://chombo-discharge.github.io/discharge-inception/
+- **PDF**: https://chombo-discharge.github.io/discharge-inception/discharge-inception.pdf
+
+> Note: the PDF and HTML are only deployed when commits are pushed to `main` on the `chombo-discharge/discharge-inception` repository. PRs build but do not deploy.
+
+## Configuration and usage
+
+1. **Install** — follow the [Installation guide](https://chombo-discharge.github.io/discharge-inception/Installation/Installation.html).
+2. **Define the parameter space** — write a `Runs.py` or `Runs.json` file describing the sweep variables and their values.
+3. **Submit** — run `discharge-inception run <definition>` to create run directories and submit SLURM array jobs.
+4. **Monitor** — check job status with `discharge-inception ls <study_dir>`.
+5. **Post-process** — extract results with `discharge-inception extract-inception-voltages` and related commands.
+
+See the [CLI reference](https://chombo-discharge.github.io/discharge-inception/Installation/CLI.html) for full option details.
+
+## Compilation
 
 To make both programs (inception-stepper program and itokmc-based program), run
 ```
