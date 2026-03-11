@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setting up a simulation directory &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Where jobscripts fit" href="WhereFit.html" />
+    <link rel="prev" title="Script roles" href="../Architecture/ScriptRoles.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setting up a simulation directory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-it-works">How it works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#arguments">Arguments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Setting up a simulation directory</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Jobscripts/SetupTool.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="setting-up-a-simulation-directory">
+<span id="jobscripts-setup-tool"></span><h1>Setting up a simulation directory<a class="headerlink" href="#setting-up-a-simulation-directory" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">Setup/setup.py</span></code> scaffolds a new simulation directory under <code class="docutils literal notranslate"><span class="pre">Exec/</span></code> (or a
+user-specified parent).  The generated directory contains <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code>,
+<code class="docutils literal notranslate"><span class="pre">GNUmakefile</span></code>, <code class="docutils literal notranslate"><span class="pre">template.inputs</span></code>, and any physics-model dependency files
+(e.g. <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code>).</p>
+<p>The produced code follows the <strong>dual-mode</strong> pattern: a single binary that runs
+either the <code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper</span></code> (inception mode) or <code class="docutils literal notranslate"><span class="pre">ItoKMCStepper</span></code>
+(plasma mode), selected at runtime via <code class="docutils literal notranslate"><span class="pre">app.mode</span></code> in the inputs file.</p>
+<section id="how-it-works">
+<h2>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">setup.py</span></code> delegates to three helper modules:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">app_main.py</span></code></dt><dd><p>Writes <code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> with parametrized <code class="docutils literal notranslate"><span class="pre">#include</span></code> directives, solver type
+aliases (<code class="docutils literal notranslate"><span class="pre">I</span></code>, <code class="docutils literal notranslate"><span class="pre">C</span></code>, <code class="docutils literal notranslate"><span class="pre">R</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>), and a dual-mode <code class="docutils literal notranslate"><span class="pre">main()</span></code> that
+branches on <code class="docutils literal notranslate"><span class="pre">app.mode</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">app_options.py</span></code></dt><dd><p>Collects all <code class="docutils literal notranslate"><span class="pre">.options</span></code> files for the selected components and
+concatenates them into <code class="docutils literal notranslate"><span class="pre">template.inputs</span></code>, prefixed by the <code class="docutils literal notranslate"><span class="pre">app.mode</span></code>
+and <code class="docutils literal notranslate"><span class="pre">plasma.voltage</span></code> runtime controls.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">app_inc.py</span></code></dt><dd><p>Reads <code class="docutils literal notranslate"><span class="pre">CD_{physics}.inc</span></code> from the plasma-model directory and copies any
+listed dependency files (e.g. <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code>) into the new application
+directory.</p>
+</dd>
+</dl>
+</section>
+<section id="arguments">
+<h2>Arguments<a class="headerlink" href="#arguments" title="Permalink to this heading"></a></h2>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 18%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Argument</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-discharge_home</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">$DISCHARGE_HOME</span></code></p></td>
+<td><p>Path to the chombo-discharge source tree.  Required; the script exits
+with an error if this is empty and the environment variable is not set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-base_dir</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Exec/</span></code> (project root)</p></td>
+<td><p>Parent directory under which the new application subdirectory is
+created.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-app_name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MyApplication</span></code></p></td>
+<td><p>Name of the new application subdirectory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-geometry</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">RegularGeometry</span></code></p></td>
+<td><p>Chombo-Discharge computational geometry class.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-physics</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code></p></td>
+<td><p>ItoKMC plasma physics model class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-ito_solver</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ItoSolver</span></code></p></td>
+<td><p>Ito-diffusion solver type (<code class="docutils literal notranslate"><span class="pre">I</span></code> template parameter).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-cdr_solver</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CdrCTU</span></code></p></td>
+<td><p>Convection-diffusion-reaction solver type (<code class="docutils literal notranslate"><span class="pre">C</span></code> template parameter).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-rte_solver</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">McPhoto</span></code></p></td>
+<td><p>Radiative-transfer solver type (<code class="docutils literal notranslate"><span class="pre">R</span></code> template parameter).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-field_solver</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FieldSolverGMG</span></code></p></td>
+<td><p>Poisson/field solver type (<code class="docutils literal notranslate"><span class="pre">F</span></code> template parameter).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-plasma_stepper</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ItoKMCBackgroundEvaluator</span></code></p></td>
+<td><p>ItoKMC time-stepper used in plasma mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-plasma_tagger</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ItoKMCStreamerTagger</span></code></p></td>
+<td><p>Cell-tagger used in plasma mode.  Pass <code class="docutils literal notranslate"><span class="pre">none</span></code> to disable tagging.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<p>The following invocation reproduces the <code class="docutils literal notranslate"><span class="pre">Exec/Rod</span></code> configuration.  Run it
+from the project root:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">Scaffold a Rod application</span><a class="headerlink" href="#id1" title="Permalink to this code"></a></div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>Setup/setup.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-discharge_home<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$DISCHARGE_HOME</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-base_dir<span class="w"> </span>Exec<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-app_name<span class="w"> </span>MyRod<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-geometry<span class="w"> </span>Rod<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-physics<span class="w"> </span>ItoKMCJSON<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-plasma_stepper<span class="w"> </span>ItoKMCBackgroundEvaluator<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-plasma_tagger<span class="w"> </span>ItoKMCStreamerTagger
+</pre></div>
+</div>
+</div>
+<p>This creates <code class="docutils literal notranslate"><span class="pre">Exec/MyRod/</span></code> containing:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">main.cpp</span></code> — dual-mode driver configured for the Rod geometry.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GNUmakefile</span></code> — ready-to-use build file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">template.inputs</span></code> — complete options for every selected component,
+with <code class="docutils literal notranslate"><span class="pre">app.mode</span></code> and <code class="docutils literal notranslate"><span class="pre">plasma.voltage</span></code> at the top.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> — dependency copied from the <code class="docutils literal notranslate"><span class="pre">ItoKMCJSON</span></code> model
+directory via <code class="docutils literal notranslate"><span class="pre">CD_ItoKMCJSON.inc</span></code>.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Architecture/ScriptRoles.html" class="btn btn-neutral float-left" title="Script roles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="WhereFit.html" class="btn btn-neutral float-right" title="Where jobscripts fit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

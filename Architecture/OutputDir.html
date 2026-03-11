@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Output directory structure &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The full call chain" href="CallChain.html" />
+    <link rel="prev" title="Dummy parameters" href="DummyParams.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Output directory structure</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Architecture/OutputDir.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="output-directory-structure">
+<span id="arch-output-dir"></span><h1>Output directory structure<a class="headerlink" href="#output-directory-structure" title="Permalink to this heading"></a></h1>
+<p>After <code class="docutils literal notranslate"><span class="pre">discharge-inception</span> <span class="pre">run</span></code> completes (and while the SLURM jobs are running),
+the output tree looks like:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>$ ls -R --file-type ~/my_rod_study
+.:
+PDIV_DB/  study0/
+
+./PDIV_DB:
+array_job_id  DischargeInceptionJobscript.py  GenericArrayJob.sh
+index.json    master.inputs                   ParseReport.py
+main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+run_0/  structure.json  chemistry.json  electron_transport_data.dat  detachment_rate.dat
+jobscript_symlink@
+
+./PDIV_DB/run_0:
+chk/  master.inputs  parameters.json  plt/  pout.*  main@
+chemistry.json  electron_transport_data.dat  detachment_rate.dat
+
+./study0:
+array_job_id  chemistry.json  GenericArrayJob.sh  inception_stepper@
+index.json    master.inputs   PlasmaJobscript.py
+main2d.Linux.64.mpic++.gfortran.OPTHIGH.MPI.ex
+run_0/  structure.json  jobscript_symlink@
+
+./study0/run_0:
+chemistry.json  detachment_rate.dat  electron_transport_data.dat
+master.inputs   parameters.json      main@
+</pre></div>
+</div>
+<p>Key files and symlinks:</p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">array_job_id</span></code></dt><dd><p>Contains the SLURM array job ID for this stage as a single integer.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">index.json</span></code></dt><dd><p>Maps integer run indices to parameter tuples.  Format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;run_&quot;</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;pressure&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry_radius&quot;</span><span class="p">],</span> <span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e5</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">],</span> <span class="o">...</span><span class="p">}}</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">structure.json</span></code></dt><dd><p>Parsed export of the run definition for this stage.  Jobscripts read it to
+get metadata such as the run prefix and <code class="docutils literal notranslate"><span class="pre">required_files</span></code> list.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">run_N/parameters.json</span></code></dt><dd><p>Named parameter dict for run N.  Convenient for inspection and for
+jobscripts that need to locate a matching database run.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">jobscript_symlink&#64;</span></code></dt><dd><p>Points to the jobscript for this stage
+(e.g. <code class="docutils literal notranslate"><span class="pre">DischargeInceptionJobscript.py</span></code>).  <code class="docutils literal notranslate"><span class="pre">GenericArrayJob.sh</span></code> calls
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">./jobscript_symlink</span></code> without knowing which script it is.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">run_N/main&#64;</span></code></dt><dd><p>Symlink pointing to the executable in the parent stage directory.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">study0/inception_stepper&#64;</span></code></dt><dd><p>Symlink pointing to <code class="docutils literal notranslate"><span class="pre">../PDIV_DB</span></code> — gives the plasma study jobscript
+direct access to database results.</p>
+</dd>
+</dl>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DummyParams.html" class="btn btn-neutral float-left" title="Dummy parameters" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CallChain.html" class="btn btn-neutral float-right" title="The full call chain" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

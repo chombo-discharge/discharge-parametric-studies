@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Architecture/ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Jobscripts/SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Jobscripts/WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Jobscripts/GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Jobscripts/DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Jobscripts/PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="PostProcess/ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcess/GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcess/AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PostProcess/PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#Symbols"><strong>Symbols</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ 
+</div>
+<h2 id="Symbols">Symbols</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    --format
+
+      <ul>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-format">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --input
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-i">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --lp
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-lp">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --lp-tau
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-lp-tau">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --no-output
+
+      <ul>
+        <li><a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-no-output">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --output
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-o">command line option</a>, <a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-output">[1]</a>, <a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-output">[2]</a>
+</li>
+      </ul></li>
+      <li>
+    --output-dir
+
+      <ul>
+        <li><a href="PostProcess/PlotDeltaERel.html#cmdoption-output-dir">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --plot
+
+      <ul>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-plot">command line option</a>, <a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-plot">[1]</a>
+</li>
+      </ul></li>
+      <li>
+    --prefix
+
+      <ul>
+        <li><a href="PostProcess/PlotDeltaERel.html#cmdoption-prefix">command line option</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    --select
+
+      <ul>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-select">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --sg
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-sg">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --sg-order
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-sg-order">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --sg-window
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-sg-window">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --tail
+
+      <ul>
+        <li><a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-tail">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --voltage
+
+      <ul>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-voltage">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -i
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-i">command line option</a>
+</li>
+      </ul></li>
+      <li>
+    -o
+
+      <ul>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-o">command line option</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    command line option
+
+      <ul>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-format">--format</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-i">--input</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-lp">--lp</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-lp-tau">--lp-tau</a>
+</li>
+        <li><a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-no-output">--no-output</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-o">--output</a>, <a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-output">[1]</a>, <a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-output">[2]</a>
+</li>
+        <li><a href="PostProcess/PlotDeltaERel.html#cmdoption-output-dir">--output-dir</a>
+</li>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-plot">--plot</a>, <a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-plot">[1]</a>
+</li>
+        <li><a href="PostProcess/PlotDeltaERel.html#cmdoption-prefix">--prefix</a>
+</li>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-select">--select</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-sg">--sg</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-sg-order">--sg-order</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-sg-window">--sg-window</a>
+</li>
+        <li><a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-tail">--tail</a>
+</li>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-voltage">--voltage</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-i">-i</a>
+</li>
+        <li><a href="PostProcess/AnalyzeTimeSeries.html#cmdoption-o">-o</a>
+</li>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-arg-db_dir">db_dir</a>, <a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-arg-db_dir">[1]</a>, <a href="PostProcess/PlotDeltaERel.html#cmdoption-arg-db_dir">[2]</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    db_dir
+
+      <ul>
+        <li><a href="PostProcess/ExtractInceptionVoltages.html#cmdoption-arg-db_dir">command line option</a>, <a href="PostProcess/GatherPlasmaEventLogs.html#cmdoption-arg-db_dir">[1]</a>, <a href="PostProcess/PlotDeltaERel.html#cmdoption-arg-db_dir">[2]</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

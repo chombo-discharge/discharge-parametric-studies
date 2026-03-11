@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysing simulation time-series output &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Plotting relative electric field change over time" href="PlotDeltaERel.html" />
+    <link rel="prev" title="Identifying discharge inception events from plasma logs" href="GatherPlasmaEventLogs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Analysing simulation time-series output</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Analysing simulation time-series output</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/PostProcess/AnalyzeTimeSeries.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="analysing-simulation-time-series-output">
+<span id="postprocess-analyzetimeseries"></span><h1>Analysing simulation time-series output<a class="headerlink" href="#analysing-simulation-time-series-output" title="Permalink to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">AnalyzeTimeSeries.py</span></code> reads a block-wise ASCII plasma simulation log
+(typically <code class="docutils literal notranslate"><span class="pre">pout.0</span></code>) and produces a clean, aligned 10-column <code class="docutils literal notranslate"><span class="pre">.dat</span></code> file
+together with an interactive Matplotlib figure.</p>
+<p>For every <code class="docutils literal notranslate"><span class="pre">Driver::Time</span> <span class="pre">step</span> <span class="pre">report</span></code> block the script extracts eight physical
+fields:</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 20%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Time</p></td>
+<td><p>Simulation time</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>dt</p></td>
+<td><p>Time-step size</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>Delta E(max)</p></td>
+<td><p>Maximum relative electric field change (%)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>Delta E(rel)</p></td>
+<td><p>Mean relative electric field change (%)</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Q (ohmic)</p></td>
+<td><p>Ohmic charge (C)</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>Q (electrode)</p></td>
+<td><p>Electrode charge (C)</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>Sum (phi_optical)</p></td>
+<td><p>Integrated optical ionisation source (dimensionless)</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>Sum (src_optical)</p></td>
+<td><p>Integrated optical source rate (1/s)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Two further columns are derived by finite differentiation of the charge columns:</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 20%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>9</p></td>
+<td><p>I (ohmic)</p></td>
+<td><p>Ohmic current dQ<sub>ohmic</sub>/dt  (A)</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>I (electrode)</p></td>
+<td><p>Electrode current dQ<sub>electrode</sub>/dt  (A)</p></td>
+</tr>
+</tbody>
+</table>
+<p>The processing pipeline is:</p>
+<ol class="arabic simple">
+<li><p>Parse all time-step blocks from the log.</p></li>
+<li><p>Optionally smooth columns 3-6 with a <strong>Savitzky-Golay</strong> filter (<code class="docutils literal notranslate"><span class="pre">--sg</span></code>).</p></li>
+<li><p>Compute columns 9-10 as finite-difference derivatives of the (possibly
+smoothed) Q columns.</p></li>
+<li><p>Optionally apply a <strong>bidirectional exponential moving average</strong> low-pass
+filter to columns 9-10 (<code class="docutils literal notranslate"><span class="pre">--lp</span></code>).</p></li>
+<li><p>Write the aligned <code class="docutils literal notranslate"><span class="pre">.dat</span></code> file with a commented column header.</p></li>
+<li><p>Display a 2 x 4 Matplotlib figure of columns 3–10 vs time.</p></li>
+</ol>
+<p>The output file always begins with commented lines documenting the column
+layout, and all values are written in 8-digit scientific notation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Optional dependencies</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">scipy</span></code> — required when <code class="docutils literal notranslate"><span class="pre">--sg</span></code> is used.  Install with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">scipy</span>
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> — required for the interactive plot.  If absent, a warning
+is printed and the script continues without plotting.  Install with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">matplotlib</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Neither package is needed to write the <code class="docutils literal notranslate"><span class="pre">.dat</span></code> file without smoothing.</p>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-i">
+<span id="cmdoption-input"></span><span class="sig-name descname"><span class="pre">-i</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--input</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-i" title="Permalink to this definition"></a></dt>
+<dd><p>Path to the input ASCII log file.  Defaults to <code class="docutils literal notranslate"><span class="pre">pout.0</span></code> in the current
+working directory.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-o">
+<span id="cmdoption-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-o" title="Permalink to this definition"></a></dt>
+<dd><p>Path for the output <code class="docutils literal notranslate"><span class="pre">.dat</span></code> file.  Defaults to the input file’s directory
+with the extension replaced by <code class="docutils literal notranslate"><span class="pre">.out</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">run_0/pout.out</span></code> when the
+input is <code class="docutils literal notranslate"><span class="pre">run_0/pout.0</span></code>).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-sg">
+<span class="sig-name descname"><span class="pre">--sg</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-sg" title="Permalink to this definition"></a></dt>
+<dd><p>Apply Savitzky-Golay smoothing to columns 3-6 (Delta E and Q columns)
+before computing the derivative columns.  Requires <code class="docutils literal notranslate"><span class="pre">scipy</span></code>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-sg-window">
+<span class="sig-name descname"><span class="pre">--sg-window</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-sg-window" title="Permalink to this definition"></a></dt>
+<dd><p>Savitzky-Golay window length (default: <code class="docutils literal notranslate"><span class="pre">9</span></code>).  Must be odd and greater
+than <code class="docutils literal notranslate"><span class="pre">--sg-order</span></code>; the value is automatically reduced if necessary to fit
+the data length.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-sg-order">
+<span class="sig-name descname"><span class="pre">--sg-order</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-sg-order" title="Permalink to this definition"></a></dt>
+<dd><p>Savitzky-Golay polynomial order (default: <code class="docutils literal notranslate"><span class="pre">3</span></code>).  Must be strictly less
+than <code class="docutils literal notranslate"><span class="pre">--sg-window</span></code>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-lp">
+<span class="sig-name descname"><span class="pre">--lp</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-lp" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a bidirectional exponential moving average low-pass filter to the
+derivative columns 9-10 after differentiation.  Requires <code class="docutils literal notranslate"><span class="pre">--lp-tau</span></code>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-lp-tau">
+<span class="sig-name descname"><span class="pre">--lp-tau</span></span><span class="sig-prename descclassname"> <span class="pre">TAU</span></span><a class="headerlink" href="#cmdoption-lp-tau" title="Permalink to this definition"></a></dt>
+<dd><p>EMA time constant <span class="math notranslate nohighlight">\(\tau\)</span> in seconds (default: none).  Required when <code class="docutils literal notranslate"><span class="pre">--lp</span></code> is
+set.  Smaller values pass more high-frequency content; larger values smooth
+more aggressively.</p>
+</dd></dl>
+
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<p>Extract and write the default output without any filtering:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">PostProcess</span><span class="o">/</span><span class="n">AnalyzeTimeSeries</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span> <span class="n">run_0</span><span class="o">/</span><span class="n">pout</span><span class="mf">.0</span> <span class="o">-</span><span class="n">o</span> <span class="n">run_0</span><span class="o">/</span><span class="n">pout</span><span class="o">.</span><span class="n">out</span>
+</pre></div>
+</div>
+<p>Apply Savitzky-Golay smoothing (window 15, order 3) before differentiating:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">PostProcess</span><span class="o">/</span><span class="n">AnalyzeTimeSeries</span><span class="o">.</span><span class="n">py</span> \
+    <span class="o">-</span><span class="n">i</span> <span class="n">run_0</span><span class="o">/</span><span class="n">pout</span><span class="mf">.0</span> \
+    <span class="o">-</span><span class="n">o</span> <span class="n">run_0</span><span class="o">/</span><span class="n">pout</span><span class="o">.</span><span class="n">out</span> \
+    <span class="o">--</span><span class="n">sg</span> <span class="o">--</span><span class="n">sg</span><span class="o">-</span><span class="n">window</span> <span class="mi">15</span> <span class="o">--</span><span class="n">sg</span><span class="o">-</span><span class="n">order</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>Smooth the Q columns and then low-pass filter the resulting currents with a
+time constant of 1 ns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">PostProcess</span><span class="o">/</span><span class="n">AnalyzeTimeSeries</span><span class="o">.</span><span class="n">py</span> \
+    <span class="o">-</span><span class="n">i</span> <span class="n">run_0</span><span class="o">/</span><span class="n">pout</span><span class="mf">.0</span> \
+    <span class="o">--</span><span class="n">sg</span> \
+    <span class="o">--</span><span class="n">lp</span> <span class="o">--</span><span class="n">lp</span><span class="o">-</span><span class="n">tau</span> <span class="mf">1e-9</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="GatherPlasmaEventLogs.html" class="btn btn-neutral float-left" title="Identifying discharge inception events from plasma logs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="PlotDeltaERel.html" class="btn btn-neutral float-right" title="Plotting relative electric field change over time" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

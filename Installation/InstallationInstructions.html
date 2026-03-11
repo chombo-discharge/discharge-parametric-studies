@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation instructions &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="SLURM configuration" href="SlurmConfig.html" />
+    <link rel="prev" title="Get the source" href="GetSource.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GetSource.html">Get the source</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation instructions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#create-and-activate-a-virtual-environment">Create and activate a virtual environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-the-package">Install the package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#verify">Verify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation instructions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Installation/InstallationInstructions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation-instructions">
+<span id="installation-instructs"></span><h1>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this heading"></a></h1>
+<section id="create-and-activate-a-virtual-environment">
+<span id="install-venv"></span><h2>Create and activate a virtual environment<a class="headerlink" href="#create-and-activate-a-virtual-environment" title="Permalink to this heading"></a></h2>
+<p>A virtual environment isolates the project’s Python dependencies from the
+system Python and from other projects on the same machine.  This is especially
+important on HPC clusters, where the system Python may be managed by
+administrators and <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> into it is either forbidden or inadvisable.</p>
+<p>The virtual environment directory is conventionally named <code class="docutils literal notranslate"><span class="pre">.venv</span></code> and placed
+at the repository root.  Because compute nodes need to activate the same
+environment, the <code class="docutils literal notranslate"><span class="pre">.venv</span></code> directory must live on a shared filesystem that is
+accessible from all nodes — typically your home directory or a project scratch
+space, both of which are usually network-mounted on HPC clusters.  Do <strong>not</strong>
+place <code class="docutils literal notranslate"><span class="pre">.venv</span></code> on a node-local scratch directory (e.g. <code class="docutils literal notranslate"><span class="pre">/tmp</span></code>), as it will
+not be visible to other nodes.</p>
+<p>From the repository root:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate<span class="w">        </span><span class="c1"># Linux / macOS</span>
+<span class="c1"># .venv\Scripts\activate         # Windows</span>
+</pre></div>
+</div>
+</section>
+<section id="install-the-package">
+<span id="install-package"></span><h2>Install the package<a class="headerlink" href="#install-the-package" title="Permalink to this heading"></a></h2>
+<p>Install in <em>editable</em> mode so that local edits to the <code class="docutils literal notranslate"><span class="pre">discharge_inception/</span></code>
+source directory take effect immediately without reinstalling.  Editable mode
+also means that the <code class="docutils literal notranslate"><span class="pre">discharge-inception</span></code> command-line entry point is
+registered in the virtual environment and will always run the current state of
+the checked-out source.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">[plot]</span></code> optional dependency group adds <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> and <code class="docutils literal notranslate"><span class="pre">scipy</span></code>,
+which are used by the post-processing scripts in <code class="docutils literal notranslate"><span class="pre">PostProcess/</span></code> but are not
+required to run the configurator or submit SLURM jobs:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="w">                 </span><span class="c1"># core only</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[plot]&quot;</span><span class="w">         </span><span class="c1"># with matplotlib + scipy</span>
+</pre></div>
+</div>
+</section>
+<section id="verify">
+<span id="install-verify"></span><h2>Verify<a class="headerlink" href="#verify" title="Permalink to this heading"></a></h2>
+<p>After installing the package, confirm that the <code class="docutils literal notranslate"><span class="pre">discharge-inception</span></code> entry
+point is registered in the active virtual environment and that the package
+imports correctly.  The <code class="docutils literal notranslate"><span class="pre">which</span></code> command should resolve to the <code class="docutils literal notranslate"><span class="pre">.venv/bin/</span></code>
+directory, confirming that the system Python (or another environment) is not
+being used by mistake.  Running <code class="docutils literal notranslate"><span class="pre">--help</span></code> exercises the full import chain —
+including <code class="docutils literal notranslate"><span class="pre">configurator</span></code> and <code class="docutils literal notranslate"><span class="pre">config_util</span></code> — so any missing dependency or
+broken import will surface here rather than at job-submission time.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>which<span class="w"> </span>discharge-inception<span class="w">               </span><span class="c1"># should point into .venv/bin/</span>
+discharge-inception<span class="w"> </span>--help
+</pre></div>
+</div>
+</section>
+<section id="environment-variables">
+<span id="install-env-vars"></span><h2>Environment variables<a class="headerlink" href="#environment-variables" title="Permalink to this heading"></a></h2>
+<p>Two environment variables configure runtime behaviour on compute nodes.  Both
+paths must be reachable from all compute nodes (typically a shared filesystem
+such as <code class="docutils literal notranslate"><span class="pre">$HOME</span></code> or a project scratch space).  Because <code class="docutils literal notranslate"><span class="pre">GenericArrayJob.sh</span></code>
+runs on whatever node SLURM allocates, it cannot rely on paths that were valid
+only on the login node — using absolute paths on a shared filesystem avoids
+node-local ambiguity entirely.</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DISCHARGE_INCEPTION_VENV</span></code></dt><dd><p>Absolute path to the <code class="docutils literal notranslate"><span class="pre">.venv</span></code> directory created during installation.
+<code class="docutils literal notranslate"><span class="pre">GenericArrayJob.sh</span></code> sources <code class="docutils literal notranslate"><span class="pre">$DISCHARGE_INCEPTION_VENV/bin/activate</span></code> on
+each compute node before invoking the Python jobscript, ensuring the correct
+interpreter and installed packages are used.  If this variable is unset or
+empty, the script falls back to whatever <code class="docutils literal notranslate"><span class="pre">python</span></code> is on the default
+<code class="docutils literal notranslate"><span class="pre">PATH</span></code>, which may not have <code class="docutils literal notranslate"><span class="pre">discharge_inception</span></code> installed.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">DISCHARGE_INCEPTION_SLURM_CONFIG</span></code></dt><dd><p>Absolute path to the <code class="docutils literal notranslate"><span class="pre">slurm.toml</span></code> configuration file.  The configurator
+(<code class="docutils literal notranslate"><span class="pre">discharge-inception</span> <span class="pre">run</span></code>) reads this file at submission time to build
+<code class="docutils literal notranslate"><span class="pre">sbatch</span></code> resource arguments, and <code class="docutils literal notranslate"><span class="pre">GenericArrayJob.sh</span></code> reads it on
+compute nodes to load the required cluster modules.  Job scripts also call
+<code class="docutils literal notranslate"><span class="pre">load_slurm_config()</span></code> at runtime to retrieve the MPI launcher name and
+per-stage resource limits.  See <a class="reference internal" href="SlurmConfig.html#arch-slurm-config"><span class="std std-ref">SLURM configuration</span></a> for the full file
+format and all supported keys.</p>
+</dd>
+</dl>
+<p>Add both exports to your <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code>, SLURM prologue, or cluster environment
+module so they are present on both login and compute nodes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">DISCHARGE_INCEPTION_VENV</span><span class="o">=</span>/path/to/repo/.venv
+<span class="nb">export</span><span class="w"> </span><span class="nv">DISCHARGE_INCEPTION_SLURM_CONFIG</span><span class="o">=</span>/path/to/repo/slurm.toml
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As an alternative to <code class="docutils literal notranslate"><span class="pre">DISCHARGE_INCEPTION_SLURM_CONFIG</span></code>, standard SLURM
+environment variables (<code class="docutils literal notranslate"><span class="pre">SBATCH_ACCOUNT</span></code>, <code class="docutils literal notranslate"><span class="pre">SBATCH_TIMELIMIT</span></code>, etc.) are
+respected by <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> and can be used to supply resource requests without a
+<code class="docutils literal notranslate"><span class="pre">slurm.toml</span></code> file.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="GetSource.html" class="btn btn-neutral float-left" title="Get the source" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="SlurmConfig.html" class="btn btn-neutral float-right" title="SLURM configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Specifying the plasma simulation options &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Extracting partial discharge inception voltages" href="../PostProcess/ExtractInceptionVoltages.html" />
+    <link rel="prev" title="Specifying the inception database options" href="DischargeInceptionScript.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Specifying the plasma simulation options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#job-script-options-reference">job_script_options reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-space-and-input-overrides">Parameter space and input overrides</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Specifying the plasma simulation options</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Jobscripts/PlasmaScript.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="specifying-the-plasma-simulation-options">
+<span id="jobscripts-plasma"></span><h1>Specifying the plasma simulation options<a class="headerlink" href="#specifying-the-plasma-simulation-options" title="Permalink to this heading"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">Scripts/PlasmaJobscript.py</span></code> is the jobscript for the <strong>plasma stage</strong>.  For each
+parameter combination it:</p>
+<ol class="arabic simple">
+<li><p>Reads the database results produced by the inception stage.</p></li>
+<li><p>Selects voltages that fall within the configured K-range.</p></li>
+<li><p>Creates a per-voltage subdirectory for each selected voltage.</p></li>
+<li><p>Submits the voltage SLURM array (one task per voltage).</p></li>
+</ol>
+<p>The script does not need to be edited directly.  Runtime behaviour is controlled through
+the <code class="docutils literal notranslate"><span class="pre">job_script_options</span></code> block in the run definition.</p>
+<section id="job-script-options-reference">
+<h2>job_script_options reference<a class="headerlink" href="#job-script-options-reference" title="Permalink to this heading"></a></h2>
+<p>All keys are read from <code class="docutils literal notranslate"><span class="pre">parameters.json</span></code> at runtime.</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 12%" />
+<col style="width: 18%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">plasma_polarity</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p>both</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'positive'</span></code> selects K(+) voltages only; <code class="docutils literal notranslate"><span class="pre">'negative'</span></code> selects K(-) voltages
+only.  Omit the key (or set it to <code class="docutils literal notranslate"><span class="pre">'both'</span></code>) to include both polarities.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">K_min</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Lower bound on the ionisation integral.  Database rows with K below this value
+are excluded.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">K_max</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>from <code class="docutils literal notranslate"><span class="pre">.inputs</span></code></p></td>
+<td><p>Upper bound on the ionisation integral.  If not set, the value of
+<code class="docutils literal notranslate"><span class="pre">DischargeInceptionStepper.limit_max_K</span></code> from the <code class="docutils literal notranslate"><span class="pre">.inputs</span></code> file is used as
+the fallback.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">N_voltages</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p>all rows</p></td>
+<td><p>If set, interpolates <em>N</em> evenly-spaced voltage points per polarity instead of
+using the raw report rows from the database.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">particle_mode</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'single'</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">'single'</span></code> — launches one seed electron per task.  <code class="docutils literal notranslate"><span class="pre">'sphere'</span></code> — distributes
+seed electrons over a sphere.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">num_particles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Particle weight in <code class="docutils literal notranslate"><span class="pre">'single'</span></code> mode, or total particle count in <code class="docutils literal notranslate"><span class="pre">'sphere'</span></code>
+mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sphere_radius</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>—</p></td>
+<td><p>Sphere radius in metres.  <strong>Required</strong> when <code class="docutils literal notranslate"><span class="pre">particle_mode='sphere'</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sphere_center</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">list[float]</span></code></p></td>
+<td><p>interpolated</p></td>
+<td><p>Explicit sphere centre as <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y,</span> <span class="pre">z]</span></code>.  Defaults to the K-weighted position
+read from the database.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="parameter-space-and-input-overrides">
+<h2>Parameter space and input overrides<a class="headerlink" href="#parameter-space-and-input-overrides" title="Permalink to this heading"></a></h2>
+<p>The plasma stage supports the same <code class="docutils literal notranslate"><span class="pre">parameter_space</span></code> and <code class="docutils literal notranslate"><span class="pre">input_overrides</span></code> syntax
+as the database stage.  See <a class="reference internal" href="../Architecture/RunDefinition.html#arch-run-definition"><span class="std std-ref">Run definition</span></a> for details.</p>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<p>The following snippet shows a <code class="docutils literal notranslate"><span class="pre">job_script_options</span></code> block inside a run definition:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;run_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;rod_plasma&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;jobscript&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Scripts/PlasmaJobscript.py&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;parameter_space&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;gas_pressure&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mf">1e5</span><span class="p">,</span><span class="w"> </span><span class="mf">2e5</span><span class="p">,</span><span class="w"> </span><span class="mf">4e5</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;job_script_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;plasma_polarity&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;positive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;K_min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;K_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">5.0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;N_voltages&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;particle_mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sphere&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;num_particles&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sphere_radius&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1e-4</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DischargeInceptionScript.html" class="btn btn-neutral float-left" title="Specifying the inception database options" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../PostProcess/ExtractInceptionVoltages.html" class="btn btn-neutral float-right" title="Extracting partial discharge inception voltages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

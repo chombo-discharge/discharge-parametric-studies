@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inspecting the parameter space definition &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Running the configurator" href="RunConfigurator.html" />
+    <link rel="prev" title="Running a smoke test" href="SmokeTest.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Inspecting the parameter space definition</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Example/ParamSpace.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="inspecting-the-parameter-space-definition">
+<span id="example-param-space"></span><h1>Inspecting the parameter space definition<a class="headerlink" href="#inspecting-the-parameter-space-definition" title="Permalink to this heading"></a></h1>
+<p>Open <code class="docutils literal notranslate"><span class="pre">Exec/Rod/Studies/RadiusStudy.py</span></code> to inspect or adjust the parameter space.
+The top-level structure is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">top_object</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">databases</span><span class="o">=</span><span class="p">[</span><span class="n">inception_stepper</span><span class="p">],</span>
+    <span class="n">studies</span><span class="o">=</span><span class="p">[</span><span class="n">plasma_study</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Both entries point to the flat <code class="docutils literal notranslate"><span class="pre">Exec/Rod/</span></code> directory:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rod_dir</span> <span class="o">=</span> <span class="s1">&#39;../&#39;</span>
+</pre></div>
+</div>
+<p><strong>Database</strong> (<code class="docutils literal notranslate"><span class="pre">inception_stepper</span></code>) — computes inception voltages.  The free
+parameters are determined by the plasma study entries that carry
+<code class="docutils literal notranslate"><span class="pre">&quot;database&quot;:</span> <span class="pre">&quot;inception_stepper&quot;</span></code> (see below).  Fixed settings that apply to
+every database run are collected in <code class="docutils literal notranslate"><span class="pre">input_overrides</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;input_overrides&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;master.inputs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;uri&#39;</span><span class="p">:</span> <span class="s1">&#39;app.mode&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s2">&quot;inception&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;limit_max_K&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;DischargeInceptionStepper.limit_max_K&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">12</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;max_steps&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;Driver.max_steps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">0</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;plot_interval&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;Driver.plot_interval&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Study</strong> (<code class="docutils literal notranslate"><span class="pre">plasma_study</span></code>) — runs plasma simulations using the database
+results.  <code class="docutils literal notranslate"><span class="pre">app.mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">plasma</span></code> via <code class="docutils literal notranslate"><span class="pre">input_overrides</span></code>.  Parameters
+marked with <code class="docutils literal notranslate"><span class="pre">&quot;database&quot;:</span> <span class="pre">&quot;inception_stepper&quot;</span></code> declare a SLURM dependency: study
+jobs will not start until the corresponding database job has completed, and the
+configurator ensures that each study run is paired with the matching database entry.</p>
+<p>Plasma-only parameters (no <code class="docutils literal notranslate"><span class="pre">&quot;database&quot;</span></code> key) are swept independently:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;input_overrides&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;master.inputs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;uri&#39;</span><span class="p">:</span> <span class="s1">&#39;app.mode&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s2">&quot;plasma&quot;</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;max_steps&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;Driver.max_steps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">500</span>
+    <span class="p">},</span>
+<span class="p">},</span>
+<span class="s1">&#39;job_script_options&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;K_min&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s1">&#39;K_max&#39;</span><span class="p">:</span> <span class="mf">12.0</span><span class="p">,</span>
+    <span class="s1">&#39;plasma_polarity&#39;</span><span class="p">:</span> <span class="s1">&#39;positive&#39;</span><span class="p">,</span>
+<span class="p">},</span>
+<span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;geometry_radius&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;inception_stepper&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;Rod.radius&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">100E-6</span><span class="p">,</span> <span class="mf">500E-6</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;database&quot;</span><span class="p">:</span> <span class="s2">&quot;inception_stepper&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;chemistry.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;gas&quot;</span><span class="p">,</span> <span class="s2">&quot;law&quot;</span><span class="p">,</span> <span class="s2">&quot;ideal_gas&quot;</span><span class="p">,</span> <span class="s2">&quot;pressure&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e5</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;photoionization&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;chemistry.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;photoionization&quot;</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="s1">&#39;+[&quot;reaction&quot;=&lt;chem_react&gt;&quot;Y + (O2) -&gt; e + O2+&quot;]&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;*[&quot;reaction&quot;=&lt;chem_react&gt;&quot;Y + (O2) -&gt; (null)&quot;]&#39;</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;efficiency&quot;</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]]</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">photoionization</span></code> entry uses the <code class="docutils literal notranslate"><span class="pre">&lt;chem_react&gt;</span></code> match expression to
+locate reaction entries in <code class="docutils literal notranslate"><span class="pre">chemistry.json</span></code> by their reaction string.  The
+<code class="docutils literal notranslate"><span class="pre">+</span></code> prefix requires the match to exist; <code class="docutils literal notranslate"><span class="pre">*</span></code> creates the entry if absent.
+A Python list at any level of the <code class="docutils literal notranslate"><span class="pre">uri</span></code> produces multiple parallel writes —
+here both reactions are written in a single parameter sweep step.</p>
+<p>See <a class="reference internal" href="../Architecture/ParamSpace.html#arch-param-space"><span class="std std-ref">Defining parameter spaces</span></a>, <a class="reference internal" href="../Architecture/JsonUri.html#arch-json-uri"><span class="std std-ref">JSON URI syntax</span></a>, and <a class="reference internal" href="../Architecture/DbStudy.html#arch-db-study"><span class="std std-ref">Databases and studies</span></a> for
+a full explanation of parameter space syntax, JSON URI conventions, and database
+dependencies.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="SmokeTest.html" class="btn btn-neutral float-left" title="Running a smoke test" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="RunConfigurator.html" class="btn btn-neutral float-right" title="Running the configurator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

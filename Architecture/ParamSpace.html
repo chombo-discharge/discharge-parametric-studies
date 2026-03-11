@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Defining parameter spaces &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="JSON URI syntax" href="JsonUri.html" />
+    <link rel="prev" title="Run definition" href="RunDefinition.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/GatherPlasmaEventLogs.html">Identifying discharge inception events from plasma logs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../PostProcess/PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Defining parameter spaces</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/Architecture/ParamSpace.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="defining-parameter-spaces">
+<span id="arch-param-space"></span><h1>Defining parameter spaces<a class="headerlink" href="#defining-parameter-spaces" title="Permalink to this heading"></a></h1>
+<p>A <code class="docutils literal notranslate"><span class="pre">parameter_space</span></code> is a dictionary whose keys are parameter names.  Each
+value is another dictionary with these fields:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">database</span></code></dt><dd><p>(optional) Identifier of the database this parameter is linked to.
+Parameters that carry <code class="docutils literal notranslate"><span class="pre">&quot;database&quot;</span></code> create a SLURM <code class="docutils literal notranslate"><span class="pre">afterok</span></code> dependency
+between the study and the named database, and they restrict the Cartesian
+product to only the combinations that exist in the database.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">target</span></code></dt><dd><p>Filename (relative to the run directory) of the file to modify.  Can be a
+<code class="docutils literal notranslate"><span class="pre">*.inputs</span></code> ParmParse file or a <code class="docutils literal notranslate"><span class="pre">*.json</span></code> file.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">uri</span></code></dt><dd><p>Address of the value to change within the target file.  For <code class="docutils literal notranslate"><span class="pre">*.inputs</span></code>
+files this is a dot-separated ParmParse key string.  For <code class="docutils literal notranslate"><span class="pre">*.json</span></code> files
+this is a list of nested dictionary keys; see <a class="reference internal" href="JsonUri.html#arch-json-uri"><span class="std std-ref">JSON URI syntax</span></a> for
+special syntax.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">values</span></code></dt><dd><p>List of values.  Each element becomes one point in the parameter space.
+A 2nd-order list (list of lists) drives <em>multiple simultaneous writes</em> to
+parallel targets.</p>
+</dd>
+</dl>
+<p>The Cartesian product of all <code class="docutils literal notranslate"><span class="pre">values</span></code> lists determines the number of runs.
+Database-linked parameters restrict that product to matching combinations.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;parameter_space&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;pressure&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;chemistry.json&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;gas&quot;</span><span class="p">,</span> <span class="s2">&quot;law&quot;</span><span class="p">,</span> <span class="s2">&quot;ideal_gas&quot;</span><span class="p">,</span> <span class="s2">&quot;pressure&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e5</span><span class="p">,</span> <span class="mf">2e5</span><span class="p">,</span> <span class="mf">3e5</span><span class="p">]</span>        <span class="c1"># factor 3</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;geometry_radius&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;master.inputs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;Rod.radius&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-3</span><span class="p">,</span> <span class="mf">2e-3</span><span class="p">]</span>           <span class="c1"># factor 2</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The above yields 6 run directories (3 x 2).</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="RunDefinition.html" class="btn btn-neutral float-left" title="Run definition" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="JsonUri.html" class="btn btn-neutral float-right" title="JSON URI syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

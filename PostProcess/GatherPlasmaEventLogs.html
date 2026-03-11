@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Identifying discharge inception events from plasma logs &mdash; Discharge Inception 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Analysing simulation time-series output" href="AnalyzeTimeSeries.html" />
+    <link rel="prev" title="Extracting partial discharge inception voltages" href="ExtractInceptionVoltages.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Discharge Inception
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Installation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/GetSource.html">Get the source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/InstallationInstructions.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/SlurmConfig.html">SLURM configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/CLI.html">The CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Architecture</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/Overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RepoLayout.html">Repository layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DbStudy.html">Databases and studies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/RunDefinition.html">Run definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ParamSpace.html">Defining parameter spaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/JsonUri.html">JSON URI syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/DummyParams.html">Dummy parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/OutputDir.html">Output directory structure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/CallChain.html">The full call chain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Architecture/ScriptRoles.html">Script roles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Jobscripts guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/SetupTool.html">Setting up a simulation directory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/WhereFit.html">Where jobscripts fit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/GenericArrayJob.html">GenericArrayJob.sh — the SLURM wrapper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/DischargeInceptionScript.html">Specifying the inception database options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Jobscripts/PlasmaScript.html">Specifying the plasma simulation options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Post-processing</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ExtractInceptionVoltages.html">Extracting partial discharge inception voltages</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Identifying discharge inception events from plasma logs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="AnalyzeTimeSeries.html">Analysing simulation time-series output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PlotDeltaERel.html">Plotting relative electric field change over time</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Example — Rod Case</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Prerequisites.html">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Compile.html">Compiling the executable</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/SmokeTest.html">Running a smoke test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/ParamSpace.html">Inspecting the parameter space definition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/RunConfigurator.html">Running the configurator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/OutputLayout.html">Output directory layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Monitor.html">Monitoring jobs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Example/Inspect.html">Inspecting results</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Discharge Inception</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Identifying discharge inception events from plasma logs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/PostProcess/GatherPlasmaEventLogs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="postprocess-gatherplasmaeventlogs">
+<span id="identifying-discharge-inception-events-from-plasma-logs"></span><h1>Identifying discharge inception events from plasma logs<a class="headerlink" href="#postprocess-gatherplasmaeventlogs" title="Permalink to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">GatherPlasmaEventLogs.py</span></code> scans a plasma simulation database directory and
+reads the tail of each run’s <code class="docutils literal notranslate"><span class="pre">pout.0</span></code> log file to extract final simulation
+state and event information.  It writes a structured CSV file and always prints
+a human-readable summary table to standard output.</p>
+<p>The following information is extracted for every run:</p>
+<ul class="simple">
+<li><p><strong>final_step</strong> — last reported time-step number</p></li>
+<li><p><strong>final_time</strong> — last reported simulation time</p></li>
+<li><p><strong>final_dt</strong> — last reported time-step size</p></li>
+<li><p><strong>inception</strong> — whether a discharge inception event was detecte d</p></li>
+<li><p><strong>convergence_failures</strong> — number of Poisson solver convergence failures</p></li>
+<li><p><strong>other_abort</strong> — whether any other unexpected abort was found</p></li>
+<li><p><strong>status</strong> — derived run outcome: <code class="docutils literal notranslate"><span class="pre">completed</span></code>, <code class="docutils literal notranslate"><span class="pre">inception</span></code>,
+<code class="docutils literal notranslate"><span class="pre">convergence_failure</span></code>, <code class="docutils literal notranslate"><span class="pre">abort</span></code>, or <code class="docutils literal notranslate"><span class="pre">not_found</span></code></p></li>
+</ul>
+<p>Status is assigned with the following priority (highest first):
+<code class="docutils literal notranslate"><span class="pre">not_found</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">inception</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">convergence_failure</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">abort</span></code> -&gt;
+<code class="docutils literal notranslate"><span class="pre">completed</span></code>.</p>
+<p>The script reads <code class="docutils literal notranslate"><span class="pre">index.json</span></code> (required) and <code class="docutils literal notranslate"><span class="pre">structure.json</span></code> (optional,
+used to preserve the intended parameter ordering) from the database root
+directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Optional dependency</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">matplotlib</span></code> — required only when <code class="docutils literal notranslate"><span class="pre">--plot</span></code> is used.  If it is absent
+the script exits with an error when plotting is requested.  Install with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">matplotlib</span>
+</pre></div>
+</div>
+<p>No optional packages are needed for basic CSV extraction.</p>
+</div>
+</section>
+<section id="options">
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this heading"></a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-arg-db_dir">
+<span id="cmdoption-arg-db-dir"></span><span class="sig-name descname"><span class="pre">db_dir</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-arg-db_dir" title="Permalink to this definition"></a></dt>
+<dd><p><em>Positional (required).</em> Path to the plasma simulation database directory.
+The directory must contain an <code class="docutils literal notranslate"><span class="pre">index.json</span></code> file.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-output">
+<span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">PATH</span></span><a class="headerlink" href="#cmdoption-output" title="Permalink to this definition"></a></dt>
+<dd><p>Path for the output CSV file.  Defaults to
+<code class="docutils literal notranslate"><span class="pre">&lt;db_dir&gt;/plasma_event_log.csv</span></code>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-tail">
+<span class="sig-name descname"><span class="pre">--tail</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-tail" title="Permalink to this definition"></a></dt>
+<dd><p>Number of lines to read from the end of each <code class="docutils literal notranslate"><span class="pre">pout.0</span></code> file (default:
+<code class="docutils literal notranslate"><span class="pre">50</span></code>).</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-plot">
+<span class="sig-name descname"><span class="pre">--plot</span></span><span class="sig-prename descclassname"> <span class="pre">PARAM</span></span><a class="headerlink" href="#cmdoption-plot" title="Permalink to this definition"></a></dt>
+<dd><p>Generate an interactive Matplotlib scatter plot of final simulation time
+vs. <em>PARAM</em>, colour-coded by run status.  <em>PARAM</em> must match a key defined
+in <code class="docutils literal notranslate"><span class="pre">index.json</span></code>.  Requires <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-no-output">
+<span class="sig-name descname"><span class="pre">--no-output</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-no-output" title="Permalink to this definition"></a></dt>
+<dd><p>Skip writing the CSV file.  Only the summary table is printed to stdout.</p>
+</dd></dl>
+
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h2>
+<p>Gather event logs from a completed database and write the default CSV:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">PostProcess</span><span class="o">/</span><span class="n">GatherPlasmaEventLogs</span><span class="o">.</span><span class="n">py</span> <span class="n">results</span><span class="o">/</span><span class="n">plasma_db</span>
+</pre></div>
+</div>
+<p>Read only the last 100 lines of each log and write to a custom path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">PostProcess</span><span class="o">/</span><span class="n">GatherPlasmaEventLogs</span><span class="o">.</span><span class="n">py</span> \
+    <span class="n">results</span><span class="o">/</span><span class="n">plasma_db</span> \
+    <span class="o">--</span><span class="n">tail</span> <span class="mi">100</span> \
+    <span class="o">--</span><span class="n">output</span> <span class="n">results</span><span class="o">/</span><span class="n">event_summary</span><span class="o">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+<p>Print the summary table without writing any file, then show a scatter plot of
+final time vs the <code class="docutils literal notranslate"><span class="pre">voltage</span></code> parameter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">PostProcess</span><span class="o">/</span><span class="n">GatherPlasmaEventLogs</span><span class="o">.</span><span class="n">py</span> \
+    <span class="n">results</span><span class="o">/</span><span class="n">plasma_db</span> \
+    <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">output</span> \
+    <span class="o">--</span><span class="n">plot</span> <span class="n">voltage</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ExtractInceptionVoltages.html" class="btn btn-neutral float-left" title="Extracting partial discharge inception voltages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="AnalyzeTimeSeries.html" class="btn btn-neutral float-right" title="Analysing simulation time-series output" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, SINTEF Energi AS.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
