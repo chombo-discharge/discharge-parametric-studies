@@ -350,7 +350,7 @@ def setup(log,
                                                                 output_dir, dim,
                                                                 structure_rel_include_path)
             studies[study['identifier']] = dict(
-                    structure=study,
+                    structure=_inject_plasma_voltage_deps(study),
                     database_deps=db_params,
                     directory=st_dir,
                     keys=keys,
