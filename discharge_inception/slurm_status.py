@@ -28,7 +28,7 @@ _STATE_MAP = {
 
 
 def classify_state(state: str) -> str:
-    return _STATE_MAP.get(state.rstrip('+'), 'UNKNOWN')
+    return _STATE_MAP.get(state.split()[0].rstrip('+'), 'UNKNOWN')
 
 
 def read_job_id(logs_dir: Path) -> 'int | None':
@@ -71,7 +71,7 @@ def query_squeue(job_id: int) -> 'dict[int, str]':
     """Query squeue for pending/running array tasks. Returns {task_idx: state}."""
     try:
         result = subprocess.run(
-            ['squeue', '-j', str(job_id), '-h', '-o', '%i %T'],
+            ['squeue', '-j', str(job_id), '-h', '-r', '-o', '%i %T'],
             capture_output=True, text=True, timeout=10
         )
     except (FileNotFoundError, subprocess.TimeoutExpired):
