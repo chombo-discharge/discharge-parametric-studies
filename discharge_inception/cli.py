@@ -49,6 +49,74 @@ def cmd_plot_delta_e(args) -> None:
     _import_pp('PlotDeltaE').run(args)
 
 
+def cmd_postprocess(args) -> None:
+    study_root = Path(args.study_root).resolve()
+    pdiv_db    = study_root / args.pdiv_db
+    plasma_sim = study_root / args.plasma_sim
+
+    # --- ExtractInceptionVoltages on pdiv_database ---
+    if pdiv_db.is_dir():
+        print(f"[postprocess] extract-inception-voltages  {pdiv_db}")
+        mod = _import_pp('ExtractInceptionVoltages')
+        ns  = mod.make_parser().parse_args([str(pdiv_db)])
+        try:
+            mod.run(ns)
+        except SystemExit as e:
+            if e.code:
+                print(f"  warning: extract-inception-voltages exited with code {e.code}")
+    else:
+        print(f"[postprocess] skipping pdiv database ('{pdiv_db}' not found)")
+
+    # --- GatherPlasmaEventLogs on plasma_simulations ---
+    if plasma_sim.is_dir():
+        print(f"[postprocess] gather-plasma-event-logs    {plasma_sim}")
+        mod = _import_pp('GatherPlasmaEventLogs')
+        ns  = mod.make_parser().parse_args([str(plasma_sim)])
+        try:
+            mod.run(ns)
+        except SystemExit as e:
+            if e.code:
+                print(f"  warning: gather-plasma-event-logs exited with code {e.code}")
+    else:
+        print(f"[postprocess] skipping plasma simulations ('{plasma_sim}' not found)")
+        return
+
+    # --- Per-run plots ---
+    index_file = plasma_sim / 'index.json'
+    if not index_file.exists():
+        print(f"[postprocess] skipping per-run plots: no index.json in '{plasma_sim}'")
+        return
+
+    with open(index_file) as f:
+        index = json.load(f)
+    prefix  = index.get('prefix', args.run_prefix)
+    run_ids = sorted(index.get('index', {}).keys(), key=int)
+
+    for run_id in run_ids:
+        run_dir = plasma_sim / f'{prefix}{int(run_id)}'
+        if not run_dir.is_dir():
+            print(f"[postprocess] skipping '{run_dir}': directory not found")
+            continue
+
+        print(f"[postprocess] plot-delta-e-rel             {run_dir}")
+        mod = _import_pp('PlotDeltaERel')
+        ns  = mod.make_parser().parse_args([str(run_dir)])
+        try:
+            mod.run(ns)
+        except SystemExit as e:
+            if e.code:
+                print(f"  warning: plot-delta-e-rel exited with code {e.code}")
+
+        print(f"[postprocess] plot-delta-e                 {run_dir}")
+        mod = _import_pp('PlotDeltaE')
+        ns  = mod.make_parser().parse_args([str(run_dir)])
+        try:
+            mod.run(ns)
+        except SystemExit as e:
+            if e.code:
+                print(f"  warning: plot-delta-e exited with code {e.code}")
+
+
 def cmd_list_results(args) -> None:
     from discharge_inception.results import list_results, get_results_dir
     study_dir = Path(args.study_dir)
@@ -292,6 +360,23 @@ def main() -> None:
         parents=[pp_mod.make_parser(add_help=False)],
         help='Plot peak ΔE(rel) and/or ΔE(max) vs voltage for a run_* database.')
 
+    # --- discharge-inception postprocess --------------------------------------------
+    pp_p = subparsers.add_parser(
+        'postprocess',
+        help='Run all post-processing scripts on a study directory.')
+    pp_p.add_argument(
+        'study_root', type=Path,
+        help='Top-level study directory (e.g. PressureStudy_1/).')
+    pp_p.add_argument(
+        '--pdiv-db', default='pdiv_database', metavar='DIRNAME',
+        help='Subdirectory name of the pdiv database (default: pdiv_database).')
+    pp_p.add_argument(
+        '--plasma-sim', default='plasma_simulations', metavar='DIRNAME',
+        help='Subdirectory name of the plasma simulations (default: plasma_simulations).')
+    pp_p.add_argument(
+        '--run-prefix', default='run_', metavar='PREFIX',
+        help='Run directory prefix (default: run_). Overridden by prefix in index.json.')
+
     # --- discharge-inception list-results -------------------------------------------
     lr_p = subparsers.add_parser(
         'list-results',
@@ -318,6 +403,8 @@ def main() -> None:
         cmd_plot_delta_e_rel(args)
     elif args.command == 'plot-delta-e':
         cmd_plot_delta_e(args)
+    elif args.command == 'postprocess':
+        cmd_postprocess(args)
     elif args.command == 'list-results':
         cmd_list_results(args)
 
