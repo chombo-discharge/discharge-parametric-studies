@@ -228,12 +228,93 @@ def cmd_ls(args) -> None:
 
 
 # ---------------------------------------------------------------------------
-# discharge-inception status
+# discharge-inception slurm-status
 # ---------------------------------------------------------------------------
 
 def cmd_status(args) -> None:
     from discharge_inception.slurm_status import cmd_status as _cmd
     _cmd(args)
+
+
+# ---------------------------------------------------------------------------
+# discharge-inception plasma-status
+# ---------------------------------------------------------------------------
+
+def cmd_plasma_status(args) -> None:
+    import csv
+    from discharge_inception.results import get_results_dir
+
+    path = Path(args.plasma_sim).resolve()
+
+    # Accept either a CSV file directly or a plasma_simulations directory
+    if path.is_file():
+        csv_path = path
+    else:
+        csv_path = get_results_dir(path) / 'plasma_event_log.csv'
+
+    if not csv_path.exists():
+        print(f"error: no plasma_event_log.csv found at '{csv_path}'", file=sys.stderr)
+        print("  Run 'discharge-inception gather-plasma-event-logs' or "
+              "'discharge-inception postprocess' first.", file=sys.stderr)
+        sys.exit(1)
+
+    with open(csv_path, newline='', encoding='utf-8') as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    if not rows:
+        print("No data in CSV.")
+        return
+
+    # Identify parameter columns (everything between run_id and final_step)
+    all_fields = list(rows[0].keys())
+    fixed_tail = ['final_step', 'final_time', 'final_dt',
+                  'inception', 'convergence_failures', 'other_abort', 'status']
+    param_keys = [f for f in all_fields if f not in (['run_id'] + fixed_tail)]
+
+    # Apply optional status filter
+    if args.filter:
+        rows = [r for r in rows if r['status'] == args.filter]
+        if not rows:
+            print(f"No runs with status '{args.filter}'.")
+            return
+
+    # Count by status for summary line
+    from collections import Counter
+    counts = Counter(r['status'] for r in rows)
+
+    # Column widths (dynamic)
+    param_w  = max((max(len(k) for k in param_keys) if param_keys else 0), 12)
+    status_w = max(len('status'), max(len(r['status']) for r in rows))
+    time_w   = 16
+    dt_w     = 16
+
+    sep = '  '
+    param_header = sep.join(f'{k:>{param_w}}' for k in param_keys)
+    print(f"\n# CSV: {csv_path}")
+    print(f"# {'run':>5}  {param_header}  {'status':>{status_w}}"
+          f"  {'final_time':>{time_w}}  {'final_dt':>{dt_w}}")
+    rule_w = 5 + 2 + (param_w + 2) * len(param_keys) + status_w + 2 + time_w + 2 + dt_w
+    print('# ' + '-' * rule_w)
+
+    for r in rows:
+        params = sep.join(f'{r[k]:>{param_w}}' for k in param_keys)
+        t  = r['final_time'] if r['final_time'] else '—'
+        dt = r['final_dt']   if r['final_dt']   else '—'
+        try:
+            t  = f'{float(t):>{time_w}.6g}'
+        except (ValueError, TypeError):
+            t  = f'{t:>{time_w}}'
+        try:
+            dt = f'{float(dt):>{dt_w}.6g}'
+        except (ValueError, TypeError):
+            dt = f'{dt:>{dt_w}}'
+        print(f"{r['run_id']:>5}  {params}  {r['status']:>{status_w}}  {t}  {dt}")
+
+    print()
+    summary = ', '.join(f"{v} {k}" for k, v in sorted(counts.items()))
+    print(f"# {len(rows)} run(s): {summary}")
+    print()
 
 
 # ---------------------------------------------------------------------------
@@ -336,9 +417,9 @@ def main() -> None:
         'study_dirs', nargs='+', type=Path, metavar='study_dir',
         help='Study output directory containing index.json (e.g. pdiv_database/).')
 
-    # --- discharge-inception status -------------------------------------------------
+    # --- discharge-inception slurm-status -------------------------------------------
     status_p = subparsers.add_parser(
-        'status', help='Show Slurm job status for one or more study directories.')
+        'slurm-status', help='Show Slurm job status for one or more study directories.')
     status_p.add_argument(
         'study_dirs', nargs='+', type=Path, metavar='study_dir',
         help='Study directory (containing index.json) or parent directory '
@@ -363,6 +444,19 @@ def main() -> None:
     pp_p.add_argument(
         '--run-prefix', default='run_', metavar='PREFIX',
         help='Run directory prefix (default: run_). Overridden by prefix in index.json.')
+
+    # --- discharge-inception plasma-status ------------------------------------------
+    ps_p = subparsers.add_parser(
+        'plasma-status',
+        help='Show per-run plasma simulation status from plasma_event_log.csv.')
+    ps_p.add_argument(
+        'plasma_sim', type=Path,
+        help='plasma_simulations/ directory, or path to plasma_event_log.csv directly.')
+    ps_p.add_argument(
+        '--filter', default=None,
+        metavar='STATUS',
+        help='Show only runs with this status '
+             '(completed, inception, convergence_failure, abort, not_found).')
 
     # --- discharge-inception list-results -------------------------------------------
     lr_p = subparsers.add_parser(
@@ -413,8 +507,10 @@ def main() -> None:
         cmd_run(args)
     elif args.command == 'ls':
         cmd_ls(args)
-    elif args.command == 'status':
+    elif args.command == 'slurm-status':
         cmd_status(args)
+    elif args.command == 'plasma-status':
+        cmd_plasma_status(args)
     elif args.command == 'analyze-time-series':
         cmd_analyze_time_series(args)
     elif args.command == 'extract-inception-voltages':
