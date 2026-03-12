@@ -22,22 +22,22 @@ Overview
 
 ``postprocess`` runs the following steps in order:
 
-1. **ExtractInceptionVoltages** on ``pdiv_database/`` →
+1. **ExtractInceptionVoltages** on ``pdiv_database/`` ->
    ``Results/pdiv_database/inception_voltages.nc``
 
-2. **GatherPlasmaEventLogs** on ``plasma_simulations/`` →
+2. **GatherPlasmaEventLogs** on ``plasma_simulations/`` ->
    ``Results/plasma_simulations/plasma_event_log.csv``
 
 3. For every ``run_N`` sub-directory in ``plasma_simulations/``:
 
-   a. **PlotDeltaERel** → ``Results/plasma_simulations/run_N/delta_e_rel.png``
+   a. **PlotDeltaERel** -> ``Results/plasma_simulations/run_N/delta_e_rel.png``
       and ``Results/plasma_simulations/run_N/delta_e_rel.csv``
-   b. **PlotDeltaE** → ``Results/plasma_simulations/run_N/peak_delta_e.png``
+   b. **PlotDeltaE** -> ``Results/plasma_simulations/run_N/peak_delta_e.png``
       and ``Results/plasma_simulations/run_N/peak_delta_e.csv``
 
 .. note::
 
-   Individual tools can also be run directly — see their own pages for
+   Individual tools can also be run directly -- see their own pages for
    standalone usage and additional options.
 
 Optional flags let you override the default directory names and run prefix:

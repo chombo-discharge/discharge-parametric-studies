@@ -31,8 +31,8 @@ Run the following to see every available subcommand:
        extract-inception-voltages
                                 Extract inception voltages from a pdiv_database and write NetCDF/CSV.
        gather-plasma-event-logs Gather plasma event logs from a database and write a CSV summary.
-       plot-delta-e-rel         Batch-plot ΔE(rel) vs time for every run in a plasma database.
-       plot-delta-e             Plot peak ΔE(rel) and/or ΔE(max) vs voltage for a run_* database.
+       plot-delta-e-rel         Batch-plot Delta E(rel) vs time for every run in a plasma database.
+       plot-delta-e             Plot peak Delta E(rel) and/or Delta E(max) vs voltage for a run_* database.
 
    options:
      -h, --help            show this help message and exit
@@ -113,7 +113,7 @@ every run in one or more study directories.
      --no-voltage   Skip inner voltage array queries (faster).
 
 Accepts a **study directory** (one that contains ``index.json``) or a **parent
-output directory** whose sub-directories are studies — in the latter case all
+output directory** whose sub-directories are studies -- in the latter case all
 studies are reported in one pass.
 
 For inception-stepper databases the table shows the outer array-job state and,
@@ -218,7 +218,7 @@ path to the CSV file.
 
 Examples::
 
-   # Basic call — pass the plasma_simulations/ directory
+   # Basic call -- pass the plasma_simulations/ directory
    discharge-inception plasma-status PressureStudy_1/plasma_simulations/
 
    # Pass the CSV file directly
@@ -268,13 +268,13 @@ Example::
 
 .. note::
 
-   See :ref:`postprocess_quickstart` → *Inspecting results* for guidance on
+   See :ref:`postprocess_quickstart` -> *Inspecting results* for guidance on
    interpreting the output.
 
 ``discharge-inception plot-delta-e``
 --------------------------------------
 
-Produces a dual-axis plot of peak ΔE(rel) and ΔE(max) vs voltage for a single
+Produces a dual-axis plot of peak Delta E(rel) and Delta E(max) vs voltage for a single
 ``run_*`` database.  This command is typically called automatically by
 ``postprocess`` for each run directory, but can also be invoked standalone for
 custom output paths or to regenerate individual plots.
@@ -361,7 +361,7 @@ Example::
 ``discharge-inception plot-delta-e-rel``
 -----------------------------------------
 
-Batch-plots ΔE(rel) vs time for every run in a plasma database, saving one
+Batch-plots Delta E(rel) vs time for every run in a plasma database, saving one
 PNG per run.  See :ref:`postprocess_plotdeltaerel` for full documentation.
 
 .. code-block:: text

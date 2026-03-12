@@ -51,7 +51,7 @@ All keys are read from ``parameters.json`` at runtime.
    * - ``particle_mode``
      - ``str``
      - ``'single'``
-     - ``'single'`` — launches one seed electron per task.  ``'sphere'`` — distributes
+     - ``'single'`` -- launches one seed electron per task.  ``'sphere'`` -- distributes
        seed electrons over a sphere.
    * - ``num_particles``
      - ``int``
@@ -60,7 +60,7 @@ All keys are read from ``parameters.json`` at runtime.
        mode.
    * - ``sphere_radius``
      - ``float``
-     - —
+     - --
      - Sphere radius in metres.  **Required** when ``particle_mode='sphere'``.
    * - ``sphere_center``
      - ``list[float]``
@@ -76,9 +76,9 @@ Initial particle structure must exist in ``chemistry.json``
 
 The plasma jobscript injects the electron seed position (and weight or sphere
 parameters) into each ``voltage_<i>/chemistry.json`` by traversing the JSON
-tree with a **required** path match (``+["id"="e"]`` → ``initial particles``
-→ ``+["single particle"]`` or ``+["sphere distribution"]``).  A required match
-raises a hard error if the target element is absent — it will not auto-create
+tree with a **required** path match (``+["id"="e"]`` -> ``initial particles``
+-> ``+["single particle"]`` or ``+["sphere distribution"]``).  A required match
+raises a hard error if the target element is absent -- it will not auto-create
 the structure.
 
 The ``chemistry.json`` template in the study directory **must** therefore
