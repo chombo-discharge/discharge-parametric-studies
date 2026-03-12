@@ -21,20 +21,18 @@ Run the following to see every available subcommand:
 
    positional arguments:
      command
-       run                   Configure and submit a parametric study.
-       ls                    List runs and parameter settings in a study directory.
-       status                Query SLURM and print a live status table for every run
-                             in one or more study directories.
-       analyze-time-series   Extract, smooth, differentiate, and filter time-series
-                             data from a plasma log.
+       run                      Configure and submit a parametric study.
+       ls                       List runs and parameter settings in a study directory.
+       slurm-status             Show Slurm job status for one or more study directories.
+       postprocess              Run all post-processing scripts on a study directory.
+       plasma-status            Show per-run plasma simulation status from plasma_event_log.csv.
+       list-results             List all post-processed result files in a study directory.
+       analyze-time-series      Extract, smooth, differentiate, and filter time-series data from a plasma log.
        extract-inception-voltages
-                             Extract inception voltages from a pdiv_database and
-                             write NetCDF/CSV.
-       gather-plasma-event-logs
-                             Gather plasma event logs from a database and write a
-                             CSV summary.
-       plot-delta-e-rel      Batch-plot Delta E(rel) vs time for every run in a plasma
-                             database.
+                                Extract inception voltages from a pdiv_database and write NetCDF/CSV.
+       gather-plasma-event-logs Gather plasma event logs from a database and write a CSV summary.
+       plot-delta-e-rel         Batch-plot ΔE(rel) vs time for every run in a plasma database.
+       plot-delta-e             Plot peak ΔE(rel) and/or ΔE(max) vs voltage for a run_* database.
 
    options:
      -h, --help            show this help message and exit
@@ -52,6 +50,8 @@ Sets up directory structure and submits the initial SLURM array jobs.
 
    usage: discharge-inception run [-h] [--output-dir OUTPUT_DIR] [--dim DIM]
                            [--verbose] [--logfile LOGFILE]
+                           [--pdiv-only]
+                           [--overwrite | --suffix SUFFIX]
                            run_definition
 
    positional arguments:
@@ -66,6 +66,12 @@ Sets up directory structure and submits the initial SLURM array jobs.
      --verbose             Increase verbosity.
      --logfile LOGFILE     Log file; rotated automatically each invocation.
                            (default: configurator.log)
+     --pdiv-only           Set up and submit only the inception (PDIV) database jobs;
+                           skip all plasma study setup and Slurm submission.
+     --overwrite           Overwrite the output directory if it already exists.
+     --suffix SUFFIX       Append SUFFIX to the output directory name to avoid
+                           conflicting with an existing directory (mutually exclusive
+                           with --overwrite).
 
 ``discharge-inception ls``
 --------------------------
@@ -88,15 +94,15 @@ Example output::
      run_0  100000  0.001            12  [done]
      run_1  200000  0.001            12
 
-``discharge-inception status``
--------------------------------
+``discharge-inception slurm-status``
+--------------------------------------
 
 Queries SLURM (via ``sacct``/``squeue``) and prints a live status table for
 every run in one or more study directories.
 
 .. code-block:: text
 
-   usage: discharge-inception status [-h] [--no-voltage] study_dir [study_dir ...]
+   usage: discharge-inception slurm-status [-h] [--no-voltage] study_dir [study_dir ...]
 
    positional arguments:
      study_dir      Study directory (containing index.json) or parent directory
@@ -115,7 +121,7 @@ for failed tasks, the exit code:
 
 .. code-block:: console
 
-   $ discharge-inception status study_results/pdiv_database/
+   $ discharge-inception slurm-status study_results/pdiv_database/
 
 .. code-block:: text
 
@@ -133,7 +139,7 @@ voltage array:
 
 .. code-block:: console
 
-   $ discharge-inception status study_results/plasma_simulations/
+   $ discharge-inception slurm-status study_results/plasma_simulations/
 
 .. code-block:: text
 
@@ -148,8 +154,153 @@ Pass ``--no-voltage`` to skip the inner voltage queries when the study has many
 runs and a fast summary is sufficient.  Multiple directories can be combined in
 a single call::
 
-   discharge-inception status study_results/pdiv_database/ study_results/plasma_simulations/
-   discharge-inception status study_results/   # auto-discovers all sub-studies
+   discharge-inception slurm-status study_results/pdiv_database/ study_results/plasma_simulations/
+   discharge-inception slurm-status study_results/   # auto-discovers all sub-studies
+
+``discharge-inception postprocess``
+-------------------------------------
+
+Orchestrates the full post-processing pipeline on a study root directory.
+The command locates the PDIV database and plasma simulation directories, runs
+each post-processing tool in the correct order, and writes all output under
+``<study_root>/Results/``.
+
+.. code-block:: text
+
+   usage: discharge-inception postprocess [-h] [--pdiv-db DIRNAME]
+                                          [--plasma-sim DIRNAME]
+                                          [--run-prefix PREFIX]
+                                          study_root
+
+   positional arguments:
+     study_root            Root directory of the parametric study.
+
+   options:
+     -h, --help            show this help message and exit
+     --pdiv-db DIRNAME     Name of the PDIV database sub-directory.
+                           (default: pdiv_database)
+     --plasma-sim DIRNAME  Name of the plasma simulations sub-directory.
+                           (default: plasma_simulations)
+     --run-prefix PREFIX   Prefix used for individual run directories inside the
+                           plasma simulation directory. Overridden automatically
+                           by the value stored in index.json when present.
+                           (default: run_)
+
+.. note::
+
+   See :ref:`postprocess_quickstart` for a step-by-step walkthrough of the full
+   post-processing workflow.
+
+Example::
+
+   discharge-inception postprocess PressureStudy_1/
+
+``discharge-inception plasma-status``
+---------------------------------------
+
+Reads ``plasma_event_log.csv`` from the Results mirror and prints a formatted
+per-run status table.  Accepts either the ``plasma_simulations/`` directory
+(in which case the CSV is located automatically under ``Results/``) or a direct
+path to the CSV file.
+
+.. code-block:: text
+
+   usage: discharge-inception plasma-status [-h] [--filter STATUS] plasma_sim
+
+   positional arguments:
+     plasma_sim      Path to the plasma_simulations/ directory or directly to
+                     plasma_event_log.csv.
+
+   options:
+     -h, --help      show this help message and exit
+     --filter STATUS Show only runs whose status matches STATUS (e.g. inception,
+                     completed, convergence_failure, abort).
+
+Examples::
+
+   # Basic call — pass the plasma_simulations/ directory
+   discharge-inception plasma-status PressureStudy_1/plasma_simulations/
+
+   # Pass the CSV file directly
+   discharge-inception plasma-status PressureStudy_1/Results/plasma_simulations/plasma_event_log.csv
+
+   # Show only runs that reached inception
+   discharge-inception plasma-status PressureStudy_1/plasma_simulations/ --filter inception
+
+``discharge-inception list-results``
+--------------------------------------
+
+Lists all post-processed result files grouped by sub-folder under ``Results/``,
+giving a quick overview of every file produced by ``postprocess``.
+
+.. code-block:: text
+
+   usage: discharge-inception list-results [-h] study_root
+
+   positional arguments:
+     study_root   Root directory of the parametric study.
+
+   options:
+     -h, --help   show this help message and exit
+
+Example::
+
+   discharge-inception list-results PressureStudy_1/
+
+.. code-block:: text
+
+   Results in PressureStudy_1/  (8 files in 4 folders)
+
+     pdiv_database/
+       inception_voltages.nc
+
+     plasma_simulations/
+       plasma_event_log.csv
+
+     plasma_simulations/run_0/
+       delta_e_rel.csv
+       delta_e_rel.png
+       peak_delta_e.csv
+       peak_delta_e.png
+
+     plasma_simulations/run_1/
+       ...
+
+.. note::
+
+   See :ref:`postprocess_quickstart` → *Inspecting results* for guidance on
+   interpreting the output.
+
+``discharge-inception plot-delta-e``
+--------------------------------------
+
+Produces a dual-axis plot of peak ΔE(rel) and ΔE(max) vs voltage for a single
+``run_*`` database.  This command is typically called automatically by
+``postprocess`` for each run directory, but can also be invoked standalone for
+custom output paths or to regenerate individual plots.
+
+.. code-block:: text
+
+   usage: discharge-inception plot-delta-e [-h] [--rel-field REL_FIELD]
+                                           [--max-field MAX_FIELD]
+                                           [--png PNG] [--output OUTPUT]
+                                           db_dir
+
+   positional arguments:
+     db_dir              Path to the run_* directory containing the plasma database.
+
+   options:
+     -h, --help          show this help message and exit
+     --rel-field REL_FIELD
+                         Name of the relative field column in the database.
+     --max-field MAX_FIELD
+                         Name of the maximum field column in the database.
+     --png PNG           Output path for the PNG figure.
+     --output OUTPUT     Output path for the CSV summary of peak values.
+
+Example::
+
+   discharge-inception plot-delta-e plasma_simulations/run_0/
 
 ``discharge-inception analyze-time-series``
 -------------------------------------------
@@ -210,7 +361,7 @@ Example::
 ``discharge-inception plot-delta-e-rel``
 -----------------------------------------
 
-Batch-plots Delta E(rel) vs time for every run in a plasma database, saving one
+Batch-plots ΔE(rel) vs time for every run in a plasma database, saving one
 PNG per run.  See :ref:`postprocess_plotdeltaerel` for full documentation.
 
 .. code-block:: text

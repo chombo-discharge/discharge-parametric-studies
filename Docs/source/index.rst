@@ -90,6 +90,7 @@ Post-processing
    :caption: Post-processing
    :hidden:
 
+   PostProcess/Quickstart
    PostProcess/ExtractInceptionVoltages
    PostProcess/GatherPlasmaEventLogs
    PostProcess/AnalyzeTimeSeries
