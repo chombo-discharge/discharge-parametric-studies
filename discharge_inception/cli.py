@@ -54,11 +54,19 @@ def cmd_postprocess(args) -> None:
     pdiv_db    = study_root / args.pdiv_db
     plasma_sim = study_root / args.plasma_sim
 
+    # Results directories mirror the study layout under <study_root>/Results/
+    pdiv_results   = study_root / 'Results' / args.pdiv_db
+    plasma_results = study_root / 'Results' / args.plasma_sim
+
     # --- ExtractInceptionVoltages on pdiv_database ---
     if pdiv_db.is_dir():
         print(f"[postprocess] extract-inception-voltages  {pdiv_db}")
+        pdiv_results.mkdir(parents=True, exist_ok=True)
         mod = _import_pp('ExtractInceptionVoltages')
-        ns  = mod.make_parser().parse_args([str(pdiv_db)])
+        ns  = mod.make_parser().parse_args([
+            str(pdiv_db),
+            '--output', str(pdiv_results / 'inception_voltages.nc'),
+        ])
         try:
             mod.run(ns)
         except SystemExit as e:
@@ -70,8 +78,12 @@ def cmd_postprocess(args) -> None:
     # --- GatherPlasmaEventLogs on plasma_simulations ---
     if plasma_sim.is_dir():
         print(f"[postprocess] gather-plasma-event-logs    {plasma_sim}")
+        plasma_results.mkdir(parents=True, exist_ok=True)
         mod = _import_pp('GatherPlasmaEventLogs')
-        ns  = mod.make_parser().parse_args([str(plasma_sim)])
+        ns  = mod.make_parser().parse_args([
+            str(plasma_sim),
+            '--output', str(plasma_results / 'plasma_event_log.csv'),
+        ])
         try:
             mod.run(ns)
         except SystemExit as e:
@@ -93,14 +105,20 @@ def cmd_postprocess(args) -> None:
     run_ids = sorted(index.get('index', {}).keys(), key=int)
 
     for run_id in run_ids:
-        run_dir = plasma_sim / f'{prefix}{int(run_id)}'
+        run_dir     = plasma_sim / f'{prefix}{int(run_id)}'
+        run_results = plasma_results / f'{prefix}{int(run_id)}'
         if not run_dir.is_dir():
             print(f"[postprocess] skipping '{run_dir}': directory not found")
             continue
+        run_results.mkdir(parents=True, exist_ok=True)
 
         print(f"[postprocess] plot-delta-e-rel             {run_dir}")
         mod = _import_pp('PlotDeltaERel')
-        ns  = mod.make_parser().parse_args([str(run_dir)])
+        ns  = mod.make_parser().parse_args([
+            str(run_dir),
+            '--png',    str(run_results / 'delta_e_rel.png'),
+            '--output', str(run_results / 'delta_e_rel.csv'),
+        ])
         try:
             mod.run(ns)
         except SystemExit as e:
@@ -109,7 +127,11 @@ def cmd_postprocess(args) -> None:
 
         print(f"[postprocess] plot-delta-e                 {run_dir}")
         mod = _import_pp('PlotDeltaE')
-        ns  = mod.make_parser().parse_args([str(run_dir)])
+        ns  = mod.make_parser().parse_args([
+            str(run_dir),
+            '--png',    str(run_results / 'peak_delta_e.png'),
+            '--output', str(run_results / 'peak_delta_e.csv'),
+        ])
         try:
             mod.run(ns)
         except SystemExit as e:
