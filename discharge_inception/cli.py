@@ -294,7 +294,19 @@ def cmd_plasma_status(args) -> None:
     if path.is_file():
         csv_path = path
     else:
-        csv_path = get_results_dir(path) / 'plasma_event_log.csv'
+        study_root = path
+        db_dir = path
+        # Auto-discover plasma_simulations sub-directory (mirrors GatherPlasmaEventLogs)
+        if not (db_dir / "index.json").exists():
+            candidate = db_dir / "plasma_simulations"
+            if (candidate / "index.json").exists():
+                db_dir = candidate
+
+        if study_root != db_dir:
+            # Path was auto-discovered: place Results relative to original root
+            csv_path = study_root / "Results" / db_dir.name / "plasma_event_log.csv"
+        else:
+            csv_path = get_results_dir(db_dir) / "plasma_event_log.csv"
 
     if not csv_path.exists():
         print(f"error: no plasma_event_log.csv found at '{csv_path}'", file=sys.stderr)
