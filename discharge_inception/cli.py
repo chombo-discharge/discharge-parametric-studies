@@ -15,14 +15,9 @@ import os
 import sys
 from pathlib import Path
 
-_PP_DIR = Path(__file__).parent.parent / 'PostProcess'
-
-
 def _import_pp(name: str):
-    """Import a PostProcess module by filename stem, adding the directory to sys.path once."""
-    if str(_PP_DIR) not in sys.path:
-        sys.path.insert(0, str(_PP_DIR))
-    return importlib.import_module(name)
+    """Import a PostProcess module by name from the installed PostProcess package."""
+    return importlib.import_module(f'PostProcess.{name}')
 
 
 # ---------------------------------------------------------------------------
@@ -47,6 +42,10 @@ def cmd_plot_delta_e_rel(args) -> None:
 
 def cmd_plot_delta_e(args) -> None:
     _import_pp('PlotDeltaE').run(args)
+
+
+def cmd_build_overview_report(args) -> None:
+    _import_pp('BuildOverviewReport').run(args)
 
 
 def cmd_postprocess(args) -> None:
@@ -137,6 +136,46 @@ def cmd_postprocess(args) -> None:
         except SystemExit as e:
             if e.code:
                 print(f"  warning: plot-delta-e exited with code {e.code}")
+
+        # AnalyzeTimeSeries: pout.0 lives inside each voltage_* subdir
+        volt_index_file = run_dir / 'index.json'
+        if volt_index_file.exists():
+            with open(volt_index_file) as _f:
+                volt_idx = json.load(_f)
+            volt_prefix = volt_idx.get('prefix', 'voltage_')
+            volt_ids = sorted(volt_idx.get('index', {}).keys(), key=int)
+            for volt_id in volt_ids:
+                volt_dir     = run_dir     / f'{volt_prefix}{int(volt_id)}'
+                volt_results = run_results / f'{volt_prefix}{int(volt_id)}'
+                pout_path = volt_dir / 'pout.0'
+                if not pout_path.exists():
+                    continue
+                volt_results.mkdir(parents=True, exist_ok=True)
+                print(f"[postprocess] analyze-time-series         {volt_dir}")
+                mod = _import_pp('AnalyzeTimeSeries')
+                ns  = mod.make_parser().parse_args([
+                    '--input',  str(pout_path),
+                    '--output', str(volt_results / 'pout.out'),
+                ])
+                try:
+                    mod.run(ns)
+                except SystemExit as e:
+                    if e.code:
+                        print(f"  warning: analyze-time-series exited with code {e.code}")
+
+    # --- BuildOverviewReport ---
+    print(f"[postprocess] build-overview-report        {study_root}")
+    mod = _import_pp('BuildOverviewReport')
+    ns  = mod.make_parser().parse_args([
+        str(study_root),
+        '--pdiv-db',    args.pdiv_db,
+        '--plasma-sim', args.plasma_sim,
+    ])
+    try:
+        mod.run(ns)
+    except SystemExit as e:
+        if e.code:
+            print(f"  warning: build-overview-report exited with code {e.code}")
 
 
 def cmd_list_results(args) -> None:
@@ -250,7 +289,19 @@ def cmd_plasma_status(args) -> None:
     if path.is_file():
         csv_path = path
     else:
-        csv_path = get_results_dir(path) / 'plasma_event_log.csv'
+        study_root = path
+        db_dir = path
+        # Auto-discover plasma_simulations sub-directory (mirrors GatherPlasmaEventLogs)
+        if not (db_dir / "index.json").exists():
+            candidate = db_dir / "plasma_simulations"
+            if (candidate / "index.json").exists():
+                db_dir = candidate
+
+        if study_root != db_dir:
+            # Path was auto-discovered: place Results relative to original root
+            csv_path = study_root / "Results" / db_dir.name / "plasma_event_log.csv"
+        else:
+            csv_path = get_results_dir(db_dir) / "plasma_event_log.csv"
 
     if not csv_path.exists():
         print(f"error: no plasma_event_log.csv found at '{csv_path}'", file=sys.stderr)
@@ -369,7 +420,7 @@ def cmd_run(args) -> None:
     if doroll:
         fh.doRollover()
 
-    output_dir = _resolve_output_dir(args.output_dir, args.overwrite, args.suffix)
+    output_dir = _resolve_output_dir(args.output_dir.resolve(), args.overwrite, args.suffix)
     if output_dir != args.output_dir:
         log.info(f"Output directory renamed to '{output_dir}'")
     configurator.setup(log, output_dir, args.run_definition, dim=args.dim,
@@ -472,42 +523,54 @@ def main() -> None:
         'study_dir', type=Path,
         help='Study directory (containing index.json and Results/).')
 
+    def _add_pp_subparser(name, module, help_text):
+        """Register a PostProcess subparser, falling back to a stub if unavailable."""
+        try:
+            pp_mod = _import_pp(module)
+            subparsers.add_parser(name, parents=[pp_mod.make_parser(add_help=False)],
+                                  help=help_text)
+        except ImportError:
+            stub = subparsers.add_parser(name, help=help_text + ' [unavailable]')
+            stub.set_defaults(_pp_unavailable=module)
+
     # --- inception analyze-time-series ------------------------------------
-    pp_mod = _import_pp('AnalyzeTimeSeries')
-    subparsers.add_parser(
-        'analyze-time-series',
-        parents=[pp_mod.make_parser(add_help=False)],
-        help='Extract, smooth, differentiate, and filter time-series data from a plasma log.')
+    _add_pp_subparser(
+        'analyze-time-series', 'AnalyzeTimeSeries',
+        'Extract, smooth, differentiate, and filter time-series data from a plasma log.')
 
     # --- inception extract-inception-voltages -----------------------------
-    pp_mod = _import_pp('ExtractInceptionVoltages')
-    subparsers.add_parser(
-        'extract-inception-voltages',
-        parents=[pp_mod.make_parser(add_help=False)],
-        help='Extract inception voltages from a pdiv_database and write NetCDF/CSV.')
+    _add_pp_subparser(
+        'extract-inception-voltages', 'ExtractInceptionVoltages',
+        'Extract inception voltages from a pdiv_database and write NetCDF/CSV.')
 
     # --- inception gather-plasma-event-logs -------------------------------
-    pp_mod = _import_pp('GatherPlasmaEventLogs')
-    subparsers.add_parser(
-        'gather-plasma-event-logs',
-        parents=[pp_mod.make_parser(add_help=False)],
-        help='Gather plasma event logs from a database and write a CSV summary.')
+    _add_pp_subparser(
+        'gather-plasma-event-logs', 'GatherPlasmaEventLogs',
+        'Gather plasma event logs from a database and write a CSV summary.')
 
     # --- inception plot-delta-e-rel ---------------------------------------
-    pp_mod = _import_pp('PlotDeltaERel')
-    subparsers.add_parser(
-        'plot-delta-e-rel',
-        parents=[pp_mod.make_parser(add_help=False)],
-        help='Batch-plot ΔE(rel) vs time for every run in a plasma database.')
+    _add_pp_subparser(
+        'plot-delta-e-rel', 'PlotDeltaERel',
+        'Batch-plot ΔE(rel) vs time for every run in a plasma database.')
 
     # --- inception plot-delta-e -------------------------------------------
-    pp_mod = _import_pp('PlotDeltaE')
-    subparsers.add_parser(
-        'plot-delta-e',
-        parents=[pp_mod.make_parser(add_help=False)],
-        help='Plot peak ΔE(rel) and/or ΔE(max) vs voltage for a run_* database.')
+    _add_pp_subparser(
+        'plot-delta-e', 'PlotDeltaE',
+        'Plot peak ΔE(rel) and/or ΔE(max) vs voltage for a run_* database.')
+
+    # --- inception build-overview-report ----------------------------------
+    _add_pp_subparser(
+        'build-overview-report', 'BuildOverviewReport',
+        'Generate a multi-page PDF overview report for an inception study.')
 
     args = parser.parse_args()
+
+    if getattr(args, '_pp_unavailable', None):
+        print(f"error: PostProcess module '{args._pp_unavailable}' is not available.\n"
+              f"The PostProcess scripts are not bundled with the installed package.\n"
+              f"Clone the repository and run inception from within it to use this command.",
+              file=sys.stderr)
+        sys.exit(1)
 
     if args.command == 'run':
         cmd_run(args)
@@ -527,6 +590,8 @@ def main() -> None:
         cmd_plot_delta_e_rel(args)
     elif args.command == 'plot-delta-e':
         cmd_plot_delta_e(args)
+    elif args.command == 'build-overview-report':
+        cmd_build_overview_report(args)
     elif args.command == 'postprocess':
         cmd_postprocess(args)
     elif args.command == 'list-results':

@@ -14,4 +14,4 @@ inception = "discharge_inception.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["discharge_inception*"]
+include = ["discharge_inception*", "PostProcess*"]
