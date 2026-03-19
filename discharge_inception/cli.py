@@ -15,14 +15,9 @@ import os
 import sys
 from pathlib import Path
 
-_PP_DIR = Path(__file__).parent.parent / 'PostProcess'
-
-
 def _import_pp(name: str):
-    """Import a PostProcess module by filename stem, adding the directory to sys.path once."""
-    if str(_PP_DIR) not in sys.path:
-        sys.path.insert(0, str(_PP_DIR))
-    return importlib.import_module(name)
+    """Import a PostProcess module by name from the installed PostProcess package."""
+    return importlib.import_module(f'PostProcess.{name}')
 
 
 # ---------------------------------------------------------------------------
